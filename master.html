@@ -5,8 +5,8 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.12">
-<meta name="author" content="Your Name">
-<title>AsciiDoc Book Template</title>
+<meta name="author" content="Richard Walker">
+<title>Pragmatic OpenShift</title>
 <style>
 /* Custom AsciiDoc stylesheet based on Fedora and Red Hat text font with side TOC */
 
@@ -225,7 +225,7 @@ table.tableblock #preamble>.sectionbody>[class="paragraph"]:first-of-type p{font
 .sidebarblock>:last-child{margin-bottom:0}
 .sidebarblock>.content>.title{color:#7a2518;margin-top:0;text-align:center}
 .exampleblock>.content>:last-child>:last-child,.exampleblock>.content .olist>ol>li:last-child>:last-child,.exampleblock>.content .ulist>ul>li:last-child>:last-child,.exampleblock>.content .qlist>ol>li:last-child>:last-child,.sidebarblock>.content>:last-child>:last-child,.sidebarblock>.content .olist>ol>li:last-child>:last-child,.sidebarblock>.content .ulist>ul>li:last-child>:last-child,.sidebarblock>.content .qlist>ol>li:last-child>:last-child{margin-bottom:0}
-.literalblock pre,.listingblock pre:not(.highlight),.listingblock pre[class="highlight"],.listingblock pre[class^="highlight "],.listingblock pre.CodeRay,.listingblock pre.prettyprint{background:#f7f7f8}
+.literalblock pre,.listingblock pre:not(.highlight),.listingblock pre[class="highlight"],.listingblock pre[class^="highlight "],.listingblock pre.CodeRay,.listingblock pre.prettyprint{background:#ddd}
 .sidebarblock .literalblock pre,.sidebarblock .listingblock pre:not(.highlight),.sidebarblock .listingblock pre[class="highlight"],.sidebarblock .listingblock pre[class^="highlight "],.sidebarblock .listingblock pre.CodeRay,.sidebarblock .listingblock pre.prettyprint{background:#f2f1f1}
 .literalblock pre,.literalblock pre[class],.listingblock pre,.listingblock pre[class]{-webkit-border-radius:4px;border-radius:4px;word-wrap:break-word;padding:1em;font-size:.8125em}
 .literalblock pre.nowrap,.literalblock pre[class].nowrap,.listingblock pre.nowrap,.listingblock pre[class].nowrap{overflow-x:auto;white-space:pre;word-wrap:normal}
@@ -292,7 +292,7 @@ th.valign-middle,td.valign-middle{vertical-align:middle}
 table thead th,table tfoot th{font-weight:bold}
 tbody tr th{display:table-cell;line-height:1.6;background:#f7f8f7}
 tbody tr th,tbody tr th p,tfoot tr th,tfoot tr th p{color:rgba(0,0,0,.8);font-weight:bold}
-p.tableblock>code:only-child{background:none;padding:0}
+p.tableblock>code{color:rgba(0,0,0,.8)}
 p.tableblock{font-size:1em}
 td>div.verse{white-space:pre}
 ol{margin-left:1.75em}
@@ -452,7 +452,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
     --sidebarbackground:#CACACA;
     --linkcolor:#0D47A1;
     --linkcoloralternate:#294172; /* Friends Magneta */
-    --white:#FFFFFF;
+    --white:#FFFFFF; 
     --black:#000000;
     }
     
@@ -468,7 +468,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
     #toc.toc2 a:link{color:var(--linkcolor);}
     blockquote{color:var(--linkcoloralternate) !important}
     .quoteblock blockquote:before{color:var(--linkcoloralternate)}
-    code{color:var(--white);background-color: var(--highlightcolor) !important}
+    code{color:var(--black);background-color: var(--highlightcolor) !important}
     mark{background-color: var(--highlightcolor)} /* Text highlighting color */
     
     /* Table styles */
@@ -495,21 +495,43 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article toc2 toc-left">
 <div id="header">
-<h1>AsciiDoc Book Template</h1>
+<h1>Pragmatic OpenShift</h1>
 <div class="details">
-<span id="author" class="author">Your Name</span><br>
-<span id="email" class="email"><a href="mailto:me@email.com">me@email.com</a></span><br>
+<span id="author" class="author">Richard Walker</span><br>
+<span id="email" class="email"><a href="mailto:me@richardwalker.dev">me@richardwalker.dev</a></span><br>
 <span id="revnumber">version 1.0</span>
 </div>
 <div id="toc" class="toc2">
 <div id="toctitle">Table of Contents</div>
 <ul class="sectlevel1">
-<li><a href="#_introduction">Introduction</a>
+<li><a href="#_openshift_4_6">OpenShift 4.6</a>
 <ul class="sectlevel2">
-<li><a href="#_chapter_1">Chapter 1</a></li>
-<li><a href="#_section_title">Section Title</a>
+<li><a href="#_introduction">Introduction</a></li>
+<li><a href="#_infrastructure">Infrastructure</a>
 <ul class="sectlevel3">
-<li><a href="#_subsection_title">Subsection Title</a></li>
+<li><a href="#_architecture_overview">Architecture Overview</a></li>
+</ul>
+</li>
+<li><a href="#_prerequisites">Prerequisites</a>
+<ul class="sectlevel3">
+<li><a href="#_raspberry_pi">Raspberry Pi</a></li>
+<li><a href="#_dns">DNS</a></li>
+<li><a href="#_haproxy">HAProxy</a></li>
+<li><a href="#_apache_web_server">Apache Web Server</a></li>
+</ul>
+</li>
+<li><a href="#_installation">Installation</a>
+<ul class="sectlevel3">
+<li><a href="#_client_tools">Client Tools</a></li>
+<li><a href="#_dependencies">Dependencies</a></li>
+<li><a href="#_bootstrap_node">Bootstrap node</a></li>
+<li><a href="#_master_nodes">Master nodes</a></li>
+</ul>
+</li>
+<li><a href="#_nodes">Nodes</a>
+<ul class="sectlevel3">
+<li><a href="#_infra">Infra</a></li>
+<li><a href="#_worker">Worker</a></li>
 </ul>
 </li>
 </ul>
@@ -520,128 +542,1221 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div id="content">
 <div id="preamble">
 <div class="sectionbody">
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-python" data-lang="python"># Example 1
-while True:
-    print("Stuck in an infinite loop.")
-
-# Example 2
-counter = 5
-while counter &gt; 2:
-    print(counter)
-    counter -= 1</code></pre>
+<div class="paragraph">
+<p>Preface</p>
 </div>
+<div class="paragraph">
+<p>OpenShift was first launched in 2011 and relied on Linux containers to deploy and run user applications. In 2014, Kubernetes was open-sourced by Google, pitched as"
+a system for automating deployment, scaling, and operations of application containers."</p>
 </div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-yaml" data-lang="yaml">---
-test: true</code></pre>
+<div class="paragraph">
+<p>The release of OpenShift V3 was quite substantial. OpenShift began using containers and images, and to orchestrate those images, V3 introduced using Kubernetes.</p>
 </div>
+<div class="paragraph">
+<p>Red Hat proved to be at the forefront of container technology, second only to Google in contributions to Cloud Native Computing Foundation (CNCF) projects. Moreover, the acquisition of CoreOS in January 2018. The CoreOS flagship product was a lightweight Linux operating system designed to run containerized applications, and Red Hat made available in OpenShift V4 as "Red Hat Enterprise Linux CoreOS".</p>
+</div>
+<div class="paragraph">
+<p>Red Hat OpenShift is one of those technologies causing a lot of noise and demand for skills in the Information Technology industry. Still relatively young, it is under massive development and evolving faster than professionals can keep up.</p>
+</div>
+<div class="paragraph">
+<p>The pragmatic OpenShift guide aims to provide a hands-on approach to deploying and configuring OpenShift 4.6.</p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_introduction">Introduction</h2>
+<h2 id="_openshift_4_6">OpenShift 4.6</h2>
 <div class="sectionbody">
 <div class="sect2">
-<h3 id="_chapter_1">Chapter 1</h3>
+<h3 id="_introduction">Introduction</h3>
 <div class="paragraph">
-<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
-eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-mollit anim id est laborum.</p>
+<p>This document aims to remove the ambiguity sometimes found in the official documentation and using clear examples, demonstrate how to deploy an OpenShift cluster and complete the most common post-installation, configuration tasks.</p>
 </div>
-<div class="quoteblock">
-<blockquote>
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do
-eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-mollit anim id est laborum.
-</blockquote>
-<div class="attribution">
-&#8212; John Smith<br>
-<cite>Memories</cite>
+<div class="paragraph">
+<p>The primary purpose of the information detailed is for learning and building a personal lab environment. Therefore the scenarios are not intended for production use. However, it is the know-how what counts.</p>
 </div>
+<div class="paragraph">
+<p>OpenShift is a rapidly moving target, with minor releases often incrementing weekly, this document is focused on OpenShift 4.6.</p>
+</div>
+<div class="paragraph">
+<p>A challenge for a would-be OpenShift administrator is the accessibility to technology. Minimum requirements are enormous, and let us remember OpenShift (based on Kubernetes) is a cloud-native platform first. Evident from when OpenShift 4.1 was first released. Initially, it only supported Amazon Web Services (AWS) using the Installer Provisioned Infrastructure (IPI).</p>
+</div>
+<div class="paragraph">
+<p>Today, OpenShift now supports AWS, Azure, GCP, IBM, OpenStack, RHV, vSphere and bare metal. All of these have their nuances, and for a home lab, most are too costly for learning and experimenting.</p>
+</div>
+<div class="paragraph">
+<p>Bare metal allows us to provision infrastructure, and the User Provisioned Infrastructure (UPI) installation enables customisations. The process of doing a UPI bare-metal installation is far more involved than say an AWS IPI. However, the knowledge gained is invaluable, and the result is a local cluster, albeit a minimal three-node cluster.</p>
 </div>
 </div>
 <div class="sect2">
-<h3 id="_section_title">Section Title</h3>
+<h3 id="_infrastructure">Infrastructure</h3>
 <div class="paragraph">
-<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex
-ea commodo consequat. Duis aute irure dolor in reprehenderit in
-voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-mollit anim id est laborum.</p>
+<p>Infrastructure is the compute resources that software platforms get deployed on to. Traditionally and as demonstrated in this documentation that can be physical hardware. It might mean virtualisation using hypervisors such as VMware, Red Hat Virtualisation or  Hyper-V for example. Most commonly, it will likely mean cloud infrastructure. Cloud infrastructure builds on virtualisation providing on-demand abstracted resources such as hardware,  storage, and network resources.</p>
 </div>
-<div class="listingblock">
+<div class="paragraph">
+<p>In reality, cloud infrastructure resources are costly and move capital expenditure (CapEx) to operation expenditure (OpEx).  For a lab environment, a monthly bill using cloud resources would equate to the outright purchase of sufficient hardware to keep forever. For production enterprise environments, resilience, scalability and flexibility of OpEx infrastructure are highly appealing and make sense.  However, for learning, experimentation, and keeping costs down with the purchase of hardware for the long term is appealing.</p>
+</div>
+<div class="paragraph">
+<p>This guide demonstrates using  Intel® NUC&#8217;s for master nodes, which are affordable, compact with low power consumption.  Furthermore, a Raspberry Pi used for the core utility services including DNS, Load Balancer and Apache webserver.</p>
+</div>
+<div class="sect3">
+<h4 id="_architecture_overview">Architecture Overview</h4>
+<div class="paragraph">
+<p>The following diagram is a high-level overview of the lab environment deployed in this document. It depicts both the physical hosts and virtual hosts that make up a hybrid cluster.  The virtual hosts include the temporary bootstrap host, only needed during the initial deployment of the three master nodes.</p>
+</div>
+<div class="paragraph">
+<p>Three master nodes make up a minimal cluster. The nodes will play the role of "master", "worker" and "infra" nodes.</p>
+</div>
+<div class="paragraph">
+<p>Further scaling of the cluster is optional and done using virtual machines (VM) with network bridging. Using VMs provides flexibility where resources are limited. Temporarily adding and removing worker and infrastructure nodes is excellent for trying various activities while keeping the three core physical master nodes permanently.</p>
+</div>
+<div class="imageblock">
 <div class="content">
-<pre class="highlight"><code>var http = require("http"); <i class="conum" data-value="1"></i><b>(1)</b>
-var server = http.createServer(); <i class="conum" data-value="2"></i><b>(2)</b>
-server.listen(8888);</code></pre>
+<img src="images/overview-arch.png" alt="Architecture Overview">
 </div>
 </div>
-<div class="colist arabic">
-<table>
+<div class="paragraph">
+<p>The following table includes the details of the environment used throughout this document:</p>
+</div>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 1. Host Details</caption>
+<colgroup>
+<col style="width: 22.2222%;">
+<col style="width: 22.2222%;">
+<col style="width: 55.5556%;">
+</colgroup>
+<thead>
 <tr>
-<td><i class="conum" data-value="1"></i><b>1</b></td>
-<td>Some note here about that line.</td>
+<th class="tableblock halign-left valign-top"><strong>DNS Name</strong></th>
+<th class="tableblock halign-left valign-top"><strong>IP Address</strong></th>
+<th class="tableblock halign-left valign-top"><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong>client.local</strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>192.168.0.35</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>RHEL8/Fedora32 client laptop</p>
+</div></div></td>
 </tr>
 <tr>
-<td><i class="conum" data-value="2"></i><b>2</b></td>
-<td>Another note about that other line.</td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong>utilities.cluster.lab.com</strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>192.168.0.101</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Raspberry Pi 3 Model B, 4 core 1GB RAM, 8GB storage</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong>bootstrap.cluster.lab.com</strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>192.168.0.102</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>KVM VM, 4 core, 16GB RAM, 120GB storage</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong>master1.cluster.lab.com</strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>192.168.0.111</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Intel NUC i5, 4 core, 16GB RAM, 120GB storage</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong>master2.cluster.lab.com</strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>192.168.0.112</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Intel NUC i5, 4 core, 16GB RAM, 120GB storage</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong>master3.cluster.lab.com</strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>192.168.0.113</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>Intel NUC i5, 4 core, 16GB RAM, 120GB storage</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+<table class="tableblock frame-all grid-all stretch">
+<caption class="title">Table 2. Worker and Infra node examples</caption>
+<colgroup>
+<col style="width: 22.2222%;">
+<col style="width: 22.2222%;">
+<col style="width: 55.5556%;">
+</colgroup>
+<thead>
+<tr>
+<th class="tableblock halign-left valign-top"><strong>DNS Name</strong></th>
+<th class="tableblock halign-left valign-top"><strong>IP Address</strong></th>
+<th class="tableblock halign-left valign-top"><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong>worker1.cluster.lab.com</strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>192.168.0.121</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>KVM VM, 4 core, 16GB RAM, 120GB storage</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong>worker2.cluster.lab.com</strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>192.168.0.122</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>KVM VM, 4 core, 16GB RAM, 120GB storage</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong>worker3.cluster.lab.com</strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>192.168.0.123</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>KVM VM, 4 core, 16GB RAM, 120GB storage</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong>infra1.cluster.lab.com</strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>192.168.0.131</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>KVM VM, 4 core, 16GB RAM, 120GB storage</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong>infra2.cluster.lab.com</strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>192.168.0.132</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>KVM VM, 4 core, 16GB RAM, 120GB storage</p>
+</div></div></td>
+</tr>
+<tr>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code><strong>infra3.cluster.lab.com</strong></code></p></td>
+<td class="tableblock halign-left valign-top"><p class="tableblock"><code>192.168.0.133</code></p></td>
+<td class="tableblock halign-left valign-top"><div class="content"><div class="paragraph">
+<p>KVM VM, 4 core, 16GB RAM, 120GB storage</p>
+</div></div></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_prerequisites">Prerequisites</h3>
+<div class="paragraph">
+<p>Getting the prerequisites right is the essential part of deploying OpenShift. Mistakes with DNS, load balancing or networking in general, will only lead problems with the deployment of the cluster. Troubleshooting OpenShift deployments is notoriously challenging and often misleading towards the real root cause of issues.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+With OpenShift 4, begin with a minimal working deployment, adding subsequent nodes and performing any cluster configuration post-deployment.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Once bootstrapping is completed, the minimal cluster will look like this:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/overview-min.png" alt="Minimal Target Architecture Overview">
+</div>
+</div>
+<div class="paragraph">
+<p>In this guide, a Raspberry Pi is used, but it does not need to be, any host either physical or virtual (providing it is either on the same subnet or sufficient routing configured) with CentOS 7 or 8 install will do.</p>
+</div>
+<div class="paragraph">
+<p>Regardless of the device, Domain Name System (DNS) needs to be in place and the provisioning of two load balancers (LB). One LB for the Application Programming Interface (API) and another LB for ingress application traffic flowing in from outside the cluster. A web server is also needed to serve files and images used for provisioning hosts.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+All steps documented assume a Linux client computer either Fedora, CentOS or Red Hat Enterprise Linux.
+</td>
 </tr>
 </table>
 </div>
 <div class="sect3">
-<h4 id="_subsection_title">Subsection Title</h4>
+<h4 id="_raspberry_pi">Raspberry Pi</h4>
 <div class="paragraph">
-<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-commodo consequat. Duis aute irure dolor in reprehenderit in
-voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-mollit anim id est laborum.</p>
+<p>Refer to the following for information regarding CentOS for Raspberry Pi: <a href="https://wiki.centos.org/SpecialInterestGroup/AltArch/Arm32/RaspberryPi3">wiki.centos.org</a></p>
 </div>
-<div class="admonitionblock note">
+<div class="paragraph">
+<p>In this document <code>CentOS-Userland-7-armv7hl-RaspberryPI-Minimal-2009-sda.raw.xz</code> was used.</p>
+</div>
+<div class="paragraph">
+<p><code>xz</code> is a lossless compression program, if not already installed, install it on your client:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>dnf install xz -y</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Decompress the file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>unxz CentOS-Userland-7-armv7hl-RaspberryPI-Minimal-2009-sda.raw.xz</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Use <code>fdisk</code> to identify existing storage devices on your system, then insert the MicroSD card, using <code>fdisk</code> again to identify the card:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>fdisk -l</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">[ ... output omitted ... ]
+Disk /dev/sda: 14.9 GiB, 15931539456 bytes, 31116288 sectors
+[ ... output omitted ... ]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Using <code>dd</code> write the image to the SD card:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">sudo dd if=CentOS-Userland-7-armv7hl-RaspberryPI-Minimal-2009-sda.raw of=/dev/sda bs=8192 status=progress; sync</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Insert the SD card and power on the Raspberry Pi, logging in as <code>root</code> with the default password of <code>centos</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>Username: root
+Password: centos</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Expand the filesystem with <code>/usr/bin/rootfs-expand</code>.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>/usr/bin/rootfs-expand</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Set the hostname:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>hostnamectl set-hostname utilities.cluster.lab.com</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Remove NetworkManger:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>yum remove NetworkManager</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Edit <code>/etc/sysconfig/network-scripts/ifcfg-eth0</code> and configure it as a static IP, I&#8217;m setting it to <code>192.168.0.101</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>DEVICE=eth0
+TYPE=Ethernet
+BOOTPROTO=static
+ONBOOT=yes
+IPADDR=192.168.0.101
+PREFIX=24
+GATEWAY=192.168.0.1
+DNS1=192.168.0.1</code></pre>
+</div>
+</div>
+<div class="admonitionblock caution">
 <table>
 <tr>
 <td class="icon">
-<i class="fa icon-note" title="Note"></i>
+<i class="fa icon-caution" title="Caution"></i>
 </td>
 <td class="content">
-<div class="title">Some note about what you are reading</div>
-<div class="paragraph">
-<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-mollit anim id est laborum.</p>
-</div>
+As a rule of thumb, take the time and effort to manage SELinux and <code>firewalld</code> correctly, in this case, to save time and focus on the prerequisites and deployment of OpenShift, disable both:
 </td>
 </tr>
 </table>
 </div>
 <div class="paragraph">
-<p>Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-mollit anim id est laborum.</p>
+<p>Disable SELinux:</p>
 </div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>vi /etc/sysconfig/selinux</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>SELINUX=disabled</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Disable firewall:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>systemctl stop firewalld
+systemctl disable firewalld</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>These can be configured these later, but the less potential cause of issues the better because troubleshooting can be tricky if numerous problems are in the equation. Get the most basic working deployment complete, then introduce things one at a time making the process of troubleshooting "cause and effect" easier.</p>
+</div>
+<div class="paragraph">
+<p>Install any updates and reboot:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>yum update -y
+reboot</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Assuming the changes made are correct, test the static IP address using SSH from a client:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>ssh root@192.168.0.101</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_dns">DNS</h4>
+<div class="paragraph">
+<p>Install <code>dnsmasq</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>yum install dnsmasq -y</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Backup the original configuration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>cp /etc/dnsmasq.conf /etc/dnsmasq.conf.bak</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The following <code>dnsmasq.conf</code> configuration file includes a few things but a key line to point out is the <code>apps.cluster.lab.com</code> line which provides the wildcard DNS resolution such as <code>foo.apps.cluster.lab.com</code> or <code>bar.apps.cluster.lab.com</code>:</p>
+</div>
+<div class="paragraph">
+<p>Edit dnsmasq.conf:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>vi /etc/dnsmasq.conf</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>server=192.168.0.1
+server=8.8.8.8
+server=8.8.4.4
+local=/cluster.lab.com/
+address=/apps.cluster.lab.com/192.168.0.101
+interface=eth0
+listen-address=::1,127.0.0.1,192.168.0.101
+expand-hosts
+domain=cluster.lab.com
+addn-hosts=/etc/dnsmasq.openshift.hosts
+conf-dir=/etc/dnsmasq.d,.rpmnew,.rpmsave,.rpmorig
+srv-host=_etcd-server-ssl._tcp.cluster,master1.cluster.lab.com,2380,0,10
+srv-host=_etcd-server-ssl._tcp.cluster,master2.cluster.lab.com,2380,0,10
+srv-host=_etcd-server-ssl._tcp.cluster,master3.cluster.lab.com,2380,0,10</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next I&#8217;m adding all the DNS entire I might ever need for a cluster:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>vi /etc/dnsmasq.openshift.hosts</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>192.168.0.101 utilities.cluster.lab.com dns.cluster.lab.com lb.cluster.lab.com api.cluster.lab.com api-int.cluster.lab.com
+192.168.0.102 bootstrap.cluster.lab.com
+192.168.0.111 master1.cluster.lab.com etcd-0.cluster.lab.com
+192.168.0.112 master2.cluster.lab.com etcd-1.cluster.lab.com
+192.168.0.113 master3.cluster.lab.com etcd-2.cluster.lab.com
+192.168.0.121 worker1.cluster.lab.com
+192.168.0.122 worker2.cluster.lab.com
+192.168.0.123 worker3.cluster.lab.com
+192.168.0.131 infra1.cluster.lab.com
+192.168.0.132 infra2.cluster.lab.com
+192.168.0.133 infra3.cluster.lab.com</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next configure this host to use itself for DNS resolution:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>vi /etc/resolv.conf</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>search Home cluster.lab.com
+nameserver 192.168.0.101</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Lock <code>resolv.conf</code> from being modified:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>chattr +i /etc/resolv.conf</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Start and enable the service:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>systemctl enable dnsmasq.service --now</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Install bind-utils:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>yum install bind-utils -y</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Test some lookups, both IP Addresses and DNS entries should be resolvable, including <code>anything.apps.cluster.lab.com</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>nslookup www.google.com
+nslookup master1.cluster.lab.com
+nslookup 192.168.0.111
+nslookup foo.apps.cluster.lab.com
+nslookup bar.apps.cluster.lab.com</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_haproxy">HAProxy</h4>
+<div class="paragraph">
+<p>Install HAProxy:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>yum install haproxy -y</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Back up the original configuration file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And add the following configuration (changing IPs for your environment)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>vi /etc/haproxy/haproxy.cfg</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>global
+    log         127.0.0.1 local2
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+    daemon
+
+    stats socket /var/lib/haproxy/stats
+
+defaults
+    mode                    http
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option http-server-close
+    option forwardfor       except 127.0.0.0/8
+    option                  redispatch
+    retries                 3
+    timeout http-request    30s
+    timeout queue           1m
+    timeout connect         30s
+    timeout client          1m
+    timeout server          1m
+    timeout http-keep-alive 30s
+    timeout check           30s
+    maxconn                 4000
+
+frontend api
+    bind 0.0.0.0:6443
+    option tcplog
+    mode tcp
+    default_backend api
+
+backend api
+    option httpchk GET /healthz
+    http-check expect status 200
+    mode tcp
+    balance roundrobin
+    server bootstrap bootstrap.cluster.lab.com:6443 check check-ssl verify none
+    server master1 master1.cluster.lab.com:6443 check check-ssl verify none
+    server master2 master2.cluster.lab.com:6443 check check-ssl verify none
+    server master3 master3.cluster.lab.com:6443 check check-ssl verify none
+
+frontend api-int
+    bind 0.0.0.0:22623
+    option tcplog
+    mode tcp
+    default_backend api-int
+
+backend api-int
+    mode tcp
+    balance roundrobin
+    server bootstrap 192.168.0.102:22623 check
+    server master1 192.168.0.111:22623 check
+    server master2 192.168.0.112:22623 check
+    server master3 192.168.0.113:22623 check
+
+frontend apps-http
+    bind 192.168.0.101:80
+    option tcplog
+    mode tcp
+    default_backend apps-http
+
+backend apps-http
+    mode tcp
+    balance roundrobin
+    server master1 master1.cluster.lab.com:80 check
+    server master2 master2.cluster.lab.com:80 check
+    server master3 master3.cluster.lab.com:80 check
+
+frontend apps-https
+    bind 192.168.0.101:443
+    option tcplog
+    mode tcp
+    default_backend apps-https
+
+backend apps-https
+    mode tcp
+    balance roundrobin
+    option ssl-hello-chk
+    server master1 192.168.0.111:443 check
+    server master2 192.168.0.112:443 check
+    server master3 192.168.0.113:443 check
+
+listen stats
+    bind 0.0.0.0:9000
+    mode http
+    balance
+    timeout client 5000
+    timeout connect 4000
+    timeout server 30000
+    stats uri /stats
+    stats refresh 5s
+    stats realm HAProxy\ Statistics
+    stats auth admin:changeme
+    stats admin if TRUE</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This <code>haproxy.conf</code> example purposely uses inconsistent methods of configuration between the load balancers to provide good working examples. The configuration here is  correct for serving OpenShift requirements. Notice the configuration includes an HAProxy Statistics page that auto-refreshes, and that the <code>apps-http</code> excludes the SSL check.</p>
+</div>
+<div class="paragraph">
+<p>Enable and start HAProxy:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>systemctl enable haproxy.service --now</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>View the graphical statistics report at <a href="http://192.168.0.101:9000/stats" class="bare">http://192.168.0.101:9000/stats</a>. In this example the username is <code>admin</code> and password is <code>changeme</code>. If you&#8217;ve pointed your local client to use <code>192.168.0.101</code> for its DNS, try <a href="http://lb.cluster.lab.com:9000/stats" class="bare">http://lb.cluster.lab.com:9000/stats</a>.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_apache_web_server">Apache Web Server</h4>
+<div class="paragraph">
+<p>Install and configure <code>httpd</code> on port <code>8080</code> (because port 80 is already used by HAProxy)</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>yum install httpd -y</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Edit <code>httpd.conf</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>vi /etc/httpd/conf/httpd.conf</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>Listen 8080</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Enable and start the service:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>systemctl enable httpd.service --now</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Remember to append port <code>8080</code> when referring to this service, for example: <a href="http://192.168.0.101:8080/" class="bare">http://192.168.0.101:8080/</a></p>
+</div>
+<div class="paragraph">
+<p>For OpenShift bare metal installations, files can be copied into <code>/var/www/html</code> on this utilities server.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_installation">Installation</h3>
+<div class="paragraph">
+<p>At the time of writing the latest version is 4.6.4. The downloads necessary are publicly available however download a legitimate pull secret from the Red Hat cluster portal. Vising <a href="https://cloud.redhat.com/openshift/install/metal/user-provisioned" class="bare">https://cloud.redhat.com/openshift/install/metal/user-provisioned</a> for the latest versions and obtaining your pull secret.</p>
+</div>
+<div class="sect3">
+<h4 id="_client_tools">Client Tools</h4>
+<div class="paragraph">
+<p>Download the OpenShift installer program on your client computer:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-install-linux.tar.gz" class="bare">https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-install-linux.tar.gz</a></p>
+</div>
+<div class="paragraph">
+<p>Download the OpenShift command-line tools:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz" class="bare">https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz</a></p>
+</div>
+<div class="paragraph">
+<p>Checksums:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/sha256sum.txt" class="bare">https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/sha256sum.txt</a></p>
+</div>
+<div class="paragraph">
+<p>Check the integrity of the downloaded files:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>sha256sum openshift-client-linux.tar.gz
+sha256sum openshift-install-linux.tar.gz</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>c1f39a966fc0dbd4f8f0bfec0196149d54e0330de523bf906bbe2728b10a860b  openshift-client-linux.tar.gz
+b81e1d25d77a05eaae8c0f154ed563c2caee21ed63401d655a7ad3206fdfd53c  openshift-install-linux.tar.gz</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Make a <code>bin</code> directory in your home directory:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>mkdir ~/bin</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+You may prefer to extract to <code>/usr/local/bin/</code>
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Extract the CLI tools:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>tar -xvf openshift-client-linux.tar.gz -C ~/bin
+tar -xvf openshift-install-linux.tar.gz -C ~/bin</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Check the <code>oc</code> version:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>oc version</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>Client Version: 4.6.4</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Check the <code>openshift-install</code> version:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>openshift-install version</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>openshift-install 4.6.4</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create a working directory, for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>mkdir -p ~/ocp4/cluster &amp;&amp; cd ~/ocp4</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Generate a new SSH key pair that will be embedded into the OpenShift deployment, this will enable you to SSH to OpenShift nodes.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>ssh-keygen -t rsa -b 4096 -N '' -f cluster_id_rsa</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create an installation configuration file, the compute replicas is always set to zero for bare metal, this refers to worker nodes which are manually added post-deployment. The key option here is the <code>controlPlane: replicas</code> needs to be either <code>1</code> for a single node cluster or <code>3</code> for the minimal three node cluster. The bootstrap process does not complete until this defined critical is met, so plan ahead!</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>vi install-config.yaml.orig</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>apiVersion: v1
+baseDomain: lab.com
+compute:
+- hyperthreading: Enabled
+  name: worker
+  replicas: 0
+controlPlane:
+  hyperthreading: Enabled
+  name: master
+  replicas: 3
+metadata:
+  name: cluster
+networking:
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  networkType: OpenShiftSDN
+  serviceNetwork:
+  - 172.30.0.0/16
+platform:
+  none: {}
+fips: false
+pullSecret: '{"auths": ...}'
+sshKey: 'ssh-ed25519 AAAA...'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Copy the configuration file into the cluster directory, it&#8217;s important to have the original copy because the installation process destroys it! It&#8217;s handy to keep for reference and because in reality it usually takes a few attempts to get right.</p>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Remember to paste in your real pull secret and public key.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>cp install-config.yaml.orig cluster/install-config.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The following two commands create and initiates the installation process. The first create manifests step gives you an opportunity to make further tweak to the deployment. The create ignition-configs uses those manifest to create the ignition files.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>openshift-install create manifests --dir=cluster
+openshift-install create ignition-configs --dir=cluster</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The files in the <code>cluster</code> directory should now look like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>auth
+bootstrap.ign
+master.ign
+metadata.json
+worker.ign</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_dependencies">Dependencies</h4>
+<div class="paragraph">
+<p>Download the installer ISO image and the compressed metal RAW:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/rhcos-installer.x86_64.iso" class="bare">https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/rhcos-installer.x86_64.iso</a></p>
+</div>
+<div class="paragraph">
+<p><a href="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/rhcos-metal.x86_64.raw.gz" class="bare">https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/rhcos-metal.x86_64.raw.gz</a></p>
+</div>
+<div class="paragraph">
+<p>Checksums:</p>
+</div>
+<div class="paragraph">
+<p><a href="https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/sha256sum.txt" class="bare">https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/sha256sum.txt</a></p>
+</div>
+<div class="paragraph">
+<p>Check the integrity of the downloaded files:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>sha256sum rhcos-installer.x86_64.iso
+sha256sum rhcos-metal.x86_64.raw.gz</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>d15bd7ae942573eece34ba9c59e110e360f15608f36e9b83ab9f2372d235bef2  rhcos-installer.x86_64.iso
+7e61bbe56735bc26d0808d4fffc4ccac25554df7d3c72c7b678e83e56c7ac5ba  rhcos-metal.x86_64.raw.gz</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Copy the three ignition files and the Red Hat CoreOS image to the <code>utilities.cluster.lab.com</code>, to be served by Apache:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>scp cluster/*.ign root@192.168.0.101:/var/www/html/</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Copy the Red Hat CoreOS image:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>scp rhcos-metal.x86_64.raw.gz root@192.168.0.101:/var/www/html/</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On <code>utilities.cluster.lab.com</code> ensure file permissions are correct:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>chmod 644 /var/www/html/*</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>From the client computer test these files are available to download via HTTP:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>wget http://192.168.0.101:8080/bootstrap.ign</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_bootstrap_node">Bootstrap node</h4>
+<div class="paragraph">
+<p>Using either using Virtual machine manager to create a KVM VM or VirtualBox, create a Virtual Machine with 4 cores, 16GB RAM (16384) and 120GB of storage. This VM will is destroyed after the cluster installation is complete.</p>
+</div>
+<div class="paragraph">
+<p>Using the <code>rhcos-metal.x86_64.raw.gz</code> boot the VM up, until you arrive at a command prompt:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>$[core@localhost ~]$</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The VM will have an IP Address assigned via DHCP, we need to set a static IP.</p>
+</div>
+<div class="paragraph">
+<p>View current interface IP Address:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>ip a</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>View the connection:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>nmcli con show</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Connection</p>
+</div>
+<div class="paragraph">
+<p>Set the IPAddress for the bootstrap node:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.102/24 ipv4.gateway 192.168.0.1 ipv4.dns 192.168.0.101 connection.autoconnect yes</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Restart Network Manager and bring up the connection:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>sudo systemctl restart NetworkManager
+nmcli con up 'Wired Connection'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Start the CoreOS installer, providing the <code>bootstrap.ign</code> ignition file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/bootstrap.ign /dev/sda --insecure-ignition --copy-network</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Reboot the VM with <code>reboot</code>, make sure the VM boots from the hard disk storage (eject the ISO before it boots) or <code>shutdown</code> the VM and remove the CD-ROM from the boot order.</p>
+</div>
+<div class="paragraph">
+<p>Make sure the VM boots up with the correct IP Address previously assigned:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/bootstrap-prompt.png" alt="Bootstrap login prompt">
+</div>
+</div>
+<div class="paragraph">
+<p>Once the bootstrap node is up and at the login prompt with the correct IP Address, the VM should provision itself, and eventually come up in the load balancer <a href="http://192.168.0.101:9000/stats" class="bare">http://192.168.0.101:9000/stats</a>:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/bootstrap-lb.png" alt="Bootstrap load balancer">
+</div>
+</div>
+<div class="paragraph">
+<p>From a Linux client you should be able to SSH to it using the private key generated earlier:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>ssh -i cluster_id_rsa core@192.168.0.102</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Check the progress on the bootstrap node with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>journalctl -b -f -u release-image.service -u bootkube.service</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The following pods should eventually be up and running:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>sudo crictl pods
+
+...Ready               bootstrap-kube-scheduler-bootstrap.cluster.lab.com...
+...Ready               bootstrap-kube-controller-manager-bootstrap.cluster.lab.com...
+...Ready               bootstrap-kube-apiserver-bootstrap.cluster.lab.com...
+...Ready               cloud-credential-operator-bootstrap.cluster.lab.com...
+...Ready               bootstrap-cluster-version-operator-bootstrap.cluster.lab.com...
+...Ready               bootstrap-machine-config-operator-bootstrap.cluster.lab.com...
+...Ready               etcd-bootstrap-member-bootstrap.cluster.lab.com...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>List the running containers and tail the logs of any one:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>sudo crictl ps
+
+sudo crictl logs &lt;CONTAINER_ID&gt;</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>From the the Linux client the following command should return <code>ok</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>curl -X GET https://api.cluster.lab.com:6443/healthz -k</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Export the <code>kubeconfig</code> and test getting cluster operators with <code>oc get co</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>export KUBECONFIG=cluster/auth/kubeconfig
+oc get co</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You&#8217;ll only see the <code>cloud-credential</code> operator is available at this stage:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>NAME                        VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
+authentication
+cloud-credential            True        False         False      26m
+cluster-autoscaler
+config-operator
+console
+csi-snapshot-controller
+dns
+etcd
+...</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+All of these tests <strong>MUST</strong> work as documented else it&#8217;s pointless continuing any further.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Any other responses or errors mean there are issues with either networking, DNS or Load Balancing configurations. Go back and troubleshoot any issues until you get the expected results at his stage.</p>
+</div>
+<div class="paragraph">
+<p>On your client you can see the progress of the installation and that it&#8217;s moved on a step because api.cluster.lab.com is up and working:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>openshift-install --dir=cluster wait-for bootstrap-complete</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>INFO Waiting up to 20m0s for the Kubernetes API at https://api.cluster.lab.com:6443...
+INFO API v1.19.0+9f84db3 up
+INFO Waiting up to 30m0s for bootstrapping to complete...</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The bootstrapping process will not complete until all three master nodes have been provisioned.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_master_nodes">Master nodes</h4>
+<div class="paragraph">
+<p>For physical host installations, write the <code>rhcos-installer.x86_64.iso</code> image to a USB pen drive.</p>
+</div>
+<div class="paragraph">
+<p>Use <code>fdisk</code> to identify existing storage devices on your system, then insert the USB pen drive, using <code>fdisk</code> again to identify the device:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>fdisk -l</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">[ ... output omitted ... ]
+Disk /dev/sda: 58.5 GiB, 62763565056 bytes, 122585088 sectors
+[ ... output omitted ... ]</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Write the image to the device:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>sudo dd if=rhcos-installer.x86_64.iso of=/dev/sda status=progress; sync</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The next steps repeat the process of booting the three physical nodes using the Red Hat CoreOS ISO. Make sure to use <code>master.ign</code>, and the right IP Address and hostname for each master node. In the case of an Intel NUC, <code>F10</code> is used to interrupt the host BIOS and select a boot device.</p>
+</div>
+<div class="paragraph">
+<p><strong><code>master1.cluster.lab.com</code></strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">coreos.inst=yes
+coreos.inst.install_dev=sda
+coreos.inst.image_url=http://192.168.0.101:8080/rhcos-metal.raw.gz
+coreos.inst.ignition_url=http://192.168.0.101:8080/master.ign
+ip=192.168.0.111::192.168.0.1:255.255.255.0:master1.cluster.lab.com:eno1:none:192.168.0.101
+nameserver=192.168.0.101</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong><code>master2.cluster.lab.com</code></strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">coreos.inst=yes
+coreos.inst.install_dev=sda
+coreos.inst.image_url=http://192.168.0.101:8080/rhcos-metal.raw.gz
+coreos.inst.ignition_url=http://192.168.0.101:8080/master.ign
+ip=192.168.0.112::192.168.0.1:255.255.255.0:master2.cluster.lab.com:eno1:none:192.168.0.101
+nameserver=192.168.0.101</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p><strong><code>master3.cluster.lab.com</code></strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">coreos.inst=yes
+coreos.inst.install_dev=sda
+coreos.inst.image_url=http://192.168.0.101:8080/rhcos-metal.raw.gz
+coreos.inst.ignition_url=http://192.168.0.101:8080/master.ign
+ip=192.168.0.113::192.168.0.1:255.255.255.0:master3.cluster.lab.com:eno1:none:192.168.0.101
+nameserver=192.168.0.101</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_nodes">Nodes</h3>
+<div class="sect3">
+<h4 id="_infra">Infra</h4>
+
+</div>
+<div class="sect3">
+<h4 id="_worker">Worker</h4>
+
 </div>
 </div>
 </div>
@@ -650,7 +1765,7 @@ mollit anim id est laborum.</p>
 <div id="footer">
 <div id="footer-text">
 Version 1.0<br>
-Last updated 2020-11-23 06:09:56 UTC
+Last updated 2020-11-23 17:39:27 UTC
 </div>
 </div>
 <script type="text/x-mathjax-config">

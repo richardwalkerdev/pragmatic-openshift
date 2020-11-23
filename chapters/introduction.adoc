@@ -1,71 +1,15 @@
-=== Chapter 1
+=== Introduction
 
-((Lorem ipsum)) dolor sit amet, consectetur adipisicing elit, sed do
-eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-mollit anim id est laborum.
+This document aims to remove the ambiguity sometimes found in the official documentation and using clear examples, demonstrate how to deploy an OpenShift cluster and complete the most common post-installation, configuration tasks.
 
-[quote, John Smith, Memories]
-Lorem ipsum dolor sit amet, ((consectetur)) adipisicing elit, sed do
-eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad
-minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip
-ex ea commodo consequat. Duis aute irure dolor in reprehenderit in
-voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-mollit anim id est laborum.
+The primary purpose of the information detailed is for learning and building a personal lab environment. Therefore the scenarios are not intended for production use. However, it is the know-how what counts.
 
+OpenShift is a rapidly moving target, with minor releases often incrementing weekly, this document is focused on OpenShift 4.6.
 
-=== Section Title
+A challenge for a would-be OpenShift administrator is the accessibility to technology. Minimum requirements are enormous, and let us remember OpenShift (based on Kubernetes) is a cloud-native platform first. Evident from when OpenShift 4.1 was first released. Initially, it only supported Amazon Web Services (AWS) using the Installer Provisioned Infrastructure (IPI).
 
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-veniam, quis nostrud ((exercitation ullamco)) laboris nisi ut aliquip ex
-ea commodo consequat. Duis aute irure dolor in reprehenderit in
-voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-mollit anim id est laborum.
+Today, OpenShift now supports AWS, Azure, GCP, IBM, OpenStack, RHV, vSphere and bare metal. All of these have their nuances, and for a home lab, most are too costly for learning and experimenting.
 
-[source]
---------------------------------------
-var http = require("http"); // <1>
-var server = http.createServer(); // <2>
-server.listen(8888);
---------------------------------------
-
-<1> Some note here about that line.
-<2> Another note about that other line.
-
-==== Subsection Title
-
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-commodo consequat. Duis aute ((irure dolor)) in reprehenderit in
-voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur
-sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-mollit anim id est laborum.
-
-[NOTE]
-.Some note about what you are reading
-=====================================================================
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-mollit anim id est laborum.
-=====================================================================
-
-Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod
-tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
-veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea
-commodo consequat. Duis aute irure dolor in reprehenderit in voluptate
-velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint
-occaecat cupidatat non proident, sunt in culpa qui officia deserunt
-mollit anim id est laborum.
+Bare metal allows us to provision infrastructure, and the User Provisioned Infrastructure (UPI) installation enables customisations. The process of doing a UPI bare-metal installation is far more involved than say an AWS IPI. However, the knowledge gained is invaluable, and the result is a local cluster, albeit a minimal three-node cluster.
 
 // This is a comment and won't be rendered.

@@ -1,6 +1,6 @@
-= AsciiDoc Book Template
-:author: Your Name
-:email: me@email.com
+= Pragmatic OpenShift
+:author: Richard Walker
+:email: me@richardwalker.dev
 :revnumber: 1.0
 :toc: left
 :toclevels: 5
@@ -15,9 +15,12 @@
 include::common/preface.adoc[]
 
 
-== Introduction
+== OpenShift 4.6
 
 include::chapters/introduction.adoc[]
-
+include::chapters/infrastructure.adoc[]
+include::chapters/prerequisites.adoc[]
+include::chapters/installation.adoc[]
+include::chapters/nodes.adoc[]
 
 // This is a comment and won't be rendered.

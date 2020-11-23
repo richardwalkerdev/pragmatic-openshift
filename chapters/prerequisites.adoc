@@ -1,0 +1,418 @@
+=== Prerequisites
+
+Getting the prerequisites right is the essential part of deploying OpenShift. Mistakes with DNS, load balancing or networking in general, will only lead problems with the deployment of the cluster. Troubleshooting OpenShift deployments is notoriously challenging and often misleading towards the real root cause of issues. 
+
+TIP: With OpenShift 4, begin with a minimal working deployment, adding subsequent nodes and performing any cluster configuration post-deployment. 
+
+Once bootstrapping is completed, the minimal cluster will look like this:
+
+image::images/overview-min.png[Minimal Target Architecture Overview]
+
+In this guide, a Raspberry Pi is used, but it does not need to be, any host either physical or virtual (providing it is either on the same subnet or sufficient routing configured) with CentOS 7 or 8 install will do.
+
+Regardless of the device, Domain Name System (DNS) needs to be in place and the provisioning of two load balancers (LB). One LB for the Application Programming Interface (API) and another LB for ingress application traffic flowing in from outside the cluster. A web server is also needed to serve files and images used for provisioning hosts. 
+
+IMPORTANT: All steps documented assume a Linux client computer either Fedora, CentOS or Red Hat Enterprise Linux.
+
+==== Raspberry Pi
+
+Refer to the following for information regarding CentOS for Raspberry Pi: https://wiki.centos.org/SpecialInterestGroup/AltArch/Arm32/RaspberryPi3[wiki.centos.org]
+
+In this document `CentOS-Userland-7-armv7hl-RaspberryPI-Minimal-2009-sda.raw.xz` was used. 
+
+`xz` is a lossless compression program, if not already installed, install it on your client:
+
+[source]
+----
+dnf install xz -y
+----
+
+Decompress the file:
+
+[source]
+----
+unxz CentOS-Userland-7-armv7hl-RaspberryPI-Minimal-2009-sda.raw.xz
+----
+
+Use `fdisk` to identify existing storage devices on your system, then insert the MicroSD card, using `fdisk` again to identify the card:
+
+[source]
+----
+fdisk -l
+----
+
+[source%nowrap,bash]
+----
+[ ... output omitted ... ]
+Disk /dev/sda: 14.9 GiB, 15931539456 bytes, 31116288 sectors
+[ ... output omitted ... ]
+----
+
+Using `dd` write the image to the SD card:
+
+[source%nowrap,bash]
+----
+sudo dd if=CentOS-Userland-7-armv7hl-RaspberryPI-Minimal-2009-sda.raw of=/dev/sda bs=8192 status=progress; sync
+----
+
+Insert the SD card and power on the Raspberry Pi, logging in as `root` with the default password of `centos`:
+
+[source]
+----
+Username: root
+Password: centos
+----
+
+Expand the filesystem with `/usr/bin/rootfs-expand`.
+
+[source]
+----
+/usr/bin/rootfs-expand
+----
+
+Set the hostname:
+
+[source]
+----
+hostnamectl set-hostname utilities.cluster.lab.com
+----
+
+Remove NetworkManger:
+
+[source]
+----
+yum remove NetworkManager
+----
+
+Edit `/etc/sysconfig/network-scripts/ifcfg-eth0` and configure it as a static IP, I'm setting it to `192.168.0.101`:
+
+[source]
+----
+DEVICE=eth0
+TYPE=Ethernet
+BOOTPROTO=static
+ONBOOT=yes
+IPADDR=192.168.0.101
+PREFIX=24
+GATEWAY=192.168.0.1
+DNS1=192.168.0.1
+----
+
+CAUTION: As a rule of thumb, take the time and effort to manage SELinux and `firewalld` correctly, in this case, to save time and focus on the prerequisites and deployment of OpenShift, disable both:
+
+Disable SELinux:
+
+[source]
+----
+vi /etc/sysconfig/selinux
+----
+
+[source]
+----
+SELINUX=disabled
+----
+
+Disable firewall:
+
+[source]
+----
+systemctl stop firewalld
+systemctl disable firewalld
+----
+
+These can be configured these later, but the less potential cause of issues the better because troubleshooting can be tricky if numerous problems are in the equation. Get the most basic working deployment complete, then introduce things one at a time making the process of troubleshooting "cause and effect" easier.
+
+Install any updates and reboot:
+
+[source]
+----
+yum update -y
+reboot
+----
+
+Assuming the changes made are correct, test the static IP address using SSH from a client: 
+
+[source]
+----
+ssh root@192.168.0.101
+----
+
+==== DNS
+
+Install `dnsmasq`:
+
+[source]
+----
+yum install dnsmasq -y
+----
+
+Backup the original configuration:
+
+[source]
+----
+cp /etc/dnsmasq.conf /etc/dnsmasq.conf.bak
+----
+
+The following `dnsmasq.conf` configuration file includes a few things but a key line to point out is the `apps.cluster.lab.com` line which provides the wildcard DNS resolution such as `foo.apps.cluster.lab.com` or `bar.apps.cluster.lab.com`:
+
+Edit dnsmasq.conf:
+
+[source]
+----
+vi /etc/dnsmasq.conf
+----
+
+[source%nowrap]
+----
+server=192.168.0.1
+server=8.8.8.8
+server=8.8.4.4
+local=/cluster.lab.com/
+address=/apps.cluster.lab.com/192.168.0.101
+interface=eth0
+listen-address=::1,127.0.0.1,192.168.0.101
+expand-hosts
+domain=cluster.lab.com
+addn-hosts=/etc/dnsmasq.openshift.hosts
+conf-dir=/etc/dnsmasq.d,.rpmnew,.rpmsave,.rpmorig
+srv-host=_etcd-server-ssl._tcp.cluster,master1.cluster.lab.com,2380,0,10
+srv-host=_etcd-server-ssl._tcp.cluster,master2.cluster.lab.com,2380,0,10
+srv-host=_etcd-server-ssl._tcp.cluster,master3.cluster.lab.com,2380,0,10
+----
+
+Next I'm adding all the DNS entire I might ever need for a cluster:
+
+[source]
+----
+vi /etc/dnsmasq.openshift.hosts
+----
+
+[source%nowrap]
+----
+192.168.0.101 utilities.cluster.lab.com dns.cluster.lab.com lb.cluster.lab.com api.cluster.lab.com api-int.cluster.lab.com
+192.168.0.102 bootstrap.cluster.lab.com
+192.168.0.111 master1.cluster.lab.com etcd-0.cluster.lab.com
+192.168.0.112 master2.cluster.lab.com etcd-1.cluster.lab.com
+192.168.0.113 master3.cluster.lab.com etcd-2.cluster.lab.com
+192.168.0.121 worker1.cluster.lab.com
+192.168.0.122 worker2.cluster.lab.com
+192.168.0.123 worker3.cluster.lab.com
+192.168.0.131 infra1.cluster.lab.com
+192.168.0.132 infra2.cluster.lab.com
+192.168.0.133 infra3.cluster.lab.com
+----
+
+Next configure this host to use itself for DNS resolution:
+
+[source]
+----
+vi /etc/resolv.conf
+----
+
+[source]
+----
+search Home cluster.lab.com
+nameserver 192.168.0.101
+----
+
+Lock `resolv.conf` from being modified:
+
+[source]
+----
+chattr +i /etc/resolv.conf
+----
+
+Start and enable the service:
+
+[source]
+----
+systemctl enable dnsmasq.service --now
+----
+
+Install bind-utils:
+
+[source]
+----
+yum install bind-utils -y
+----
+
+Test some lookups, both IP Addresses and DNS entries should be resolvable, including `anything.apps.cluster.lab.com`:
+
+[source]
+----
+nslookup www.google.com
+nslookup master1.cluster.lab.com
+nslookup 192.168.0.111
+nslookup foo.apps.cluster.lab.com
+nslookup bar.apps.cluster.lab.com
+----
+
+==== HAProxy
+
+Install HAProxy:
+
+[source]
+----
+yum install haproxy -y
+----
+
+Back up the original configuration file:
+
+[source]
+----
+cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
+----
+
+And add the following configuration (changing IPs for your environment)
+
+[source]
+----
+vi /etc/haproxy/haproxy.cfg
+----
+
+[source%nowrap]
+----
+global
+    log         127.0.0.1 local2
+    chroot      /var/lib/haproxy
+    pidfile     /var/run/haproxy.pid
+    maxconn     4000
+    user        haproxy
+    group       haproxy
+    daemon
+
+    stats socket /var/lib/haproxy/stats
+
+defaults
+    mode                    http
+    log                     global
+    option                  httplog
+    option                  dontlognull
+    option http-server-close
+    option forwardfor       except 127.0.0.0/8
+    option                  redispatch
+    retries                 3
+    timeout http-request    30s
+    timeout queue           1m
+    timeout connect         30s
+    timeout client          1m
+    timeout server          1m
+    timeout http-keep-alive 30s
+    timeout check           30s
+    maxconn                 4000
+
+frontend api
+    bind 0.0.0.0:6443
+    option tcplog
+    mode tcp
+    default_backend api
+
+backend api
+    option httpchk GET /healthz
+    http-check expect status 200
+    mode tcp
+    balance roundrobin
+    server bootstrap bootstrap.cluster.lab.com:6443 check check-ssl verify none
+    server master1 master1.cluster.lab.com:6443 check check-ssl verify none
+    server master2 master2.cluster.lab.com:6443 check check-ssl verify none
+    server master3 master3.cluster.lab.com:6443 check check-ssl verify none
+
+frontend api-int
+    bind 0.0.0.0:22623
+    option tcplog
+    mode tcp
+    default_backend api-int
+
+backend api-int
+    mode tcp
+    balance roundrobin
+    server bootstrap 192.168.0.102:22623 check
+    server master1 192.168.0.111:22623 check
+    server master2 192.168.0.112:22623 check
+    server master3 192.168.0.113:22623 check
+
+frontend apps-http
+    bind 192.168.0.101:80
+    option tcplog
+    mode tcp
+    default_backend apps-http
+
+backend apps-http
+    mode tcp
+    balance roundrobin
+    server master1 master1.cluster.lab.com:80 check
+    server master2 master2.cluster.lab.com:80 check
+    server master3 master3.cluster.lab.com:80 check
+
+frontend apps-https
+    bind 192.168.0.101:443
+    option tcplog
+    mode tcp
+    default_backend apps-https
+
+backend apps-https
+    mode tcp
+    balance roundrobin
+    option ssl-hello-chk
+    server master1 192.168.0.111:443 check
+    server master2 192.168.0.112:443 check
+    server master3 192.168.0.113:443 check
+
+listen stats 
+    bind 0.0.0.0:9000
+    mode http
+    balance
+    timeout client 5000
+    timeout connect 4000
+    timeout server 30000
+    stats uri /stats
+    stats refresh 5s
+    stats realm HAProxy\ Statistics
+    stats auth admin:changeme
+    stats admin if TRUE
+----
+
+This `haproxy.conf` example purposely uses inconsistent methods of configuration between the load balancers to provide good working examples. The configuration here is  correct for serving OpenShift requirements. Notice the configuration includes an HAProxy Statistics page that auto-refreshes, and that the `apps-http` excludes the SSL check.
+
+Enable and start HAProxy:
+
+[source]
+----
+systemctl enable haproxy.service --now
+----
+
+View the graphical statistics report at http://192.168.0.101:9000/stats. In this example the username is `admin` and password is `changeme`. If you've pointed your local client to use `192.168.0.101` for its DNS, try http://lb.cluster.lab.com:9000/stats.
+
+==== Apache Web Server
+
+Install and configure `httpd` on port `8080` (because port 80 is already used by HAProxy)
+
+[source]
+----
+yum install httpd -y
+----
+
+Edit `httpd.conf`:
+
+[source]
+----
+vi /etc/httpd/conf/httpd.conf
+----
+
+[source]
+----
+Listen 8080
+----
+
+Enable and start the service:
+
+[source]
+----
+systemctl enable httpd.service --now
+----
+
+Remember to append port `8080` when referring to this service, for example: http://192.168.0.101:8080/
+
+For OpenShift bare metal installations, files can be copied into `/var/www/html` on this utilities server.
+
+// This is a comment and won't be rendered.

@@ -1,0 +1,86 @@
+
+=== Infrastructure
+
+Infrastructure is the compute resources that software platforms get deployed on to. Traditionally and as demonstrated in this documentation that can be physical hardware. It might mean virtualisation using hypervisors such as VMware, Red Hat Virtualisation or  Hyper-V for example. Most commonly, it will likely mean cloud infrastructure. Cloud infrastructure builds on virtualisation providing on-demand abstracted resources such as hardware,  storage, and network resources.
+
+In reality, cloud infrastructure resources are costly and move capital expenditure (CapEx) to operation expenditure (OpEx).  For a lab environment, a monthly bill using cloud resources would equate to the outright purchase of sufficient hardware to keep forever. For production enterprise environments, resilience, scalability and flexibility of OpEx infrastructure are highly appealing and make sense.  However, for learning, experimentation, and keeping costs down with the purchase of hardware for the long term is appealing. 
+
+This guide demonstrates using  Intel® NUC's for master nodes, which are affordable, compact with low power consumption.  Furthermore, a Raspberry Pi used for the core utility services including DNS, Load Balancer and Apache webserver. 
+
+==== Architecture Overview 
+
+The following diagram is a high-level overview of the lab environment deployed in this document. It depicts both the physical hosts and virtual hosts that make up a hybrid cluster.  The virtual hosts include the temporary bootstrap host, only needed during the initial deployment of the three master nodes. 
+
+Three master nodes make up a minimal cluster. The nodes will play the role of "master", "worker" and "infra" nodes. 
+
+Further scaling of the cluster is optional and done using virtual machines (VM) with network bridging. Using VMs provides flexibility where resources are limited. Temporarily adding and removing worker and infrastructure nodes is excellent for trying various activities while keeping the three core physical master nodes permanently. 
+
+image::images/overview-arch.png[Architecture Overview]
+
+The following table includes the details of the environment used throughout this document:
+
+.Host Details
+[cols="2,2,5a"]
+|===
+|*DNS Name* |*IP Address* |*Description*
+
+| ``**client.local**``
+| `192.168.0.35`
+| RHEL8/Fedora32 client laptop
+
+| ``**utilities.cluster.lab.com**``
+| `192.168.0.101`
+| Raspberry Pi 3 Model B, 4 core 1GB RAM, 8GB storage
+
+| ``**bootstrap.cluster.lab.com**``
+| `192.168.0.102`
+| KVM VM, 4 core, 16GB RAM, 120GB storage
+
+| ``**master1.cluster.lab.com**``
+| `192.168.0.111`
+| Intel NUC i5, 4 core, 16GB RAM, 120GB storage
+
+| ``**master2.cluster.lab.com**``
+| `192.168.0.112`
+| Intel NUC i5, 4 core, 16GB RAM, 120GB storage
+
+| ``**master3.cluster.lab.com**``
+| `192.168.0.113`
+| Intel NUC i5, 4 core, 16GB RAM, 120GB storage
+|===
+
+.Worker and Infra node examples
+[cols="2,2,5a"]
+|===
+|*DNS Name* |*IP Address* |*Description*
+
+| ``**worker1.cluster.lab.com**``
+| `192.168.0.121`
+| KVM VM, 4 core, 16GB RAM, 120GB storage
+
+| ``**worker2.cluster.lab.com**``
+| `192.168.0.122`
+| KVM VM, 4 core, 16GB RAM, 120GB storage
+
+| ``**worker3.cluster.lab.com**``
+| `192.168.0.123`
+| KVM VM, 4 core, 16GB RAM, 120GB storage
+
+| ``**infra1.cluster.lab.com**``
+| `192.168.0.131`
+| KVM VM, 4 core, 16GB RAM, 120GB storage
+
+| ``**infra2.cluster.lab.com**``
+| `192.168.0.132`
+| KVM VM, 4 core, 16GB RAM, 120GB storage
+
+| ``**infra3.cluster.lab.com**``
+| `192.168.0.133`
+| KVM VM, 4 core, 16GB RAM, 120GB storage
+
+|===
+
+
+
+
+// This is a comment and won't be rendered.

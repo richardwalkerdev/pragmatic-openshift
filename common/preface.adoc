@@ -1,22 +1,15 @@
 
+Preface
 
-[source,python]
---------------------------------------
-# Example 1
-while True:
-    print("Stuck in an infinite loop.")
+OpenShift was first launched in 2011 and relied on Linux containers to deploy and run user applications. In 2014, Kubernetes was open-sourced by Google, pitched as"
+a system for automating deployment, scaling, and operations of application containers."
 
-# Example 2
-counter = 5
-while counter > 2:
-    print(counter)
-    counter -= 1
---------------------------------------
+The release of OpenShift V3 was quite substantial. OpenShift began using containers and images, and to orchestrate those images, V3 introduced using Kubernetes.
 
+Red Hat proved to be at the forefront of container technology, second only to Google in contributions to Cloud Native Computing Foundation (CNCF) projects. Moreover, the acquisition of CoreOS in January 2018. The CoreOS flagship product was a lightweight Linux operating system designed to run containerized applications, and Red Hat made available in OpenShift V4 as "Red Hat Enterprise Linux CoreOS".
 
-[source,yaml]
---------------------------------------
----
-test: true
---------------------------------------
+Red Hat OpenShift is one of those technologies causing a lot of noise and demand for skills in the Information Technology industry. Still relatively young, it is under massive development and evolving faster than professionals can keep up. 
+
+The pragmatic OpenShift guide aims to provide a hands-on approach to deploying and configuring OpenShift 4.6. 
+
 // This is a comment and won't be rendered.

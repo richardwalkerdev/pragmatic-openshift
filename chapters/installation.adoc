@@ -1,0 +1,490 @@
+=== Installation
+
+At the time of writing the latest version is 4.6.4. The downloads necessary are publicly available however download a legitimate pull secret from the Red Hat cluster portal. Vising https://cloud.redhat.com/openshift/install/metal/user-provisioned for the latest versions and obtaining your pull secret. 
+
+==== Client Tools
+
+Download the OpenShift installer program on your client computer:
+
+https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-install-linux.tar.gz
+
+Download the OpenShift command-line tools:
+
+https://mirror.openshift.com/pub/openshift-v4/clients/ocp/latest/openshift-client-linux.tar.gz
+
+
+Checksums:
+
+https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/sha256sum.txt
+
+Check the integrity of the downloaded files:
+
+[source]
+----
+sha256sum openshift-client-linux.tar.gz
+sha256sum openshift-install-linux.tar.gz
+----
+
+[source]
+----
+c1f39a966fc0dbd4f8f0bfec0196149d54e0330de523bf906bbe2728b10a860b  openshift-client-linux.tar.gz
+b81e1d25d77a05eaae8c0f154ed563c2caee21ed63401d655a7ad3206fdfd53c  openshift-install-linux.tar.gz
+----
+
+Make a `bin` directory in your home directory:
+
+[source]
+----
+mkdir ~/bin
+----
+
+TIP: You may prefer to extract to `/usr/local/bin/`
+
+Extract the CLI tools:
+
+[source]
+----
+tar -xvf openshift-client-linux.tar.gz -C ~/bin
+tar -xvf openshift-install-linux.tar.gz -C ~/bin
+----
+
+Check the `oc` version:
+
+[source]
+----
+oc version
+----
+
+[source]
+----
+Client Version: 4.6.4
+----
+
+Check the `openshift-install` version:
+
+[source]
+----
+openshift-install version
+----
+
+[source]
+----
+openshift-install 4.6.4
+----
+
+Create a working directory, for example:
+
+[source]
+----
+mkdir -p ~/ocp4/cluster && cd ~/ocp4
+----
+
+Generate a new SSH key pair that will be embedded into the OpenShift deployment, this will enable you to SSH to OpenShift nodes.
+
+[source]
+----
+ssh-keygen -t rsa -b 4096 -N '' -f cluster_id_rsa
+----
+
+Create an installation configuration file, the compute replicas is always set to zero for bare metal, this refers to worker nodes which are manually added post-deployment. The key option here is the `controlPlane: replicas` needs to be either `1` for a single node cluster or `3` for the minimal three node cluster. The bootstrap process does not complete until this defined critical is met, so plan ahead!
+
+[source]
+----
+vi install-config.yaml.orig
+----
+
+[source]
+----
+apiVersion: v1
+baseDomain: lab.com 
+compute:
+- hyperthreading: Enabled   
+  name: worker
+  replicas: 0 
+controlPlane:
+  hyperthreading: Enabled   
+  name: master 
+  replicas: 3 
+metadata:
+  name: cluster 
+networking:
+  clusterNetwork:
+  - cidr: 10.128.0.0/14 
+    hostPrefix: 23 
+  networkType: OpenShiftSDN
+  serviceNetwork: 
+  - 172.30.0.0/16
+platform:
+  none: {} 
+fips: false 
+pullSecret: '{"auths": ...}' 
+sshKey: 'ssh-ed25519 AAAA...'
+----
+
+Copy the configuration file into the cluster directory, it's important to have the original copy because the installation process destroys it! It's handy to keep for reference and because in reality it usually takes a few attempts to get right.
+
+IMPORTANT: Remember to paste in your real pull secret and public key.
+
+[source]
+----
+cp install-config.yaml.orig cluster/install-config.yaml
+----
+
+The following two commands create and initiates the installation process. The first create manifests step gives you an opportunity to make further tweak to the deployment. The create ignition-configs uses those manifest to create the ignition files.
+
+[source]
+----
+openshift-install create manifests --dir=cluster
+openshift-install create ignition-configs --dir=cluster
+----
+
+The files in the `cluster` directory should now look like this:
+
+[source]
+----
+auth
+bootstrap.ign
+master.ign
+metadata.json
+worker.ign
+----
+
+==== Dependencies
+
+Download the installer ISO image and the compressed metal RAW:
+
+https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/rhcos-installer.x86_64.iso
+
+https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/rhcos-metal.x86_64.raw.gz
+
+Checksums:
+
+https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/sha256sum.txt
+
+Check the integrity of the downloaded files:
+
+[source]
+----
+sha256sum rhcos-installer.x86_64.iso
+sha256sum rhcos-metal.x86_64.raw.gz
+----
+
+[source]
+----
+d15bd7ae942573eece34ba9c59e110e360f15608f36e9b83ab9f2372d235bef2  rhcos-installer.x86_64.iso
+7e61bbe56735bc26d0808d4fffc4ccac25554df7d3c72c7b678e83e56c7ac5ba  rhcos-metal.x86_64.raw.gz
+----
+
+Copy the three ignition files and the Red Hat CoreOS image to the `utilities.cluster.lab.com`, to be served by Apache:
+
+[source]
+----
+scp cluster/*.ign root@192.168.0.101:/var/www/html/
+----
+
+Copy the Red Hat CoreOS image:
+
+[source]
+----
+scp rhcos-metal.x86_64.raw.gz root@192.168.0.101:/var/www/html/
+----
+
+On `utilities.cluster.lab.com` ensure file permissions are correct:
+
+[source]
+----
+chmod 644 /var/www/html/*
+----
+
+From the client computer test these files are available to download via HTTP:
+
+[source]
+----
+wget http://192.168.0.101:8080/bootstrap.ign
+----
+
+==== Bootstrap node
+
+Using either using Virtual machine manager to create a KVM VM or VirtualBox, create a Virtual Machine with 4 cores, 16GB RAM (16384) and 120GB of storage. This VM will is destroyed after the cluster installation is complete.
+
+Using the `rhcos-metal.x86_64.raw.gz` boot the VM up, until you arrive at a command prompt:
+
+[source]
+----
+$[core@localhost ~]$
+----
+
+The VM will have an IP Address assigned via DHCP, we need to set a static IP.
+
+View current interface IP Address:
+
+[source]
+----
+ip a
+----
+
+View the connection:
+
+[source]
+----
+nmcli con show
+----
+
+Connection
+
+Set the IPAddress for the bootstrap node:
+
+[source%nowrap,bash]
+----
+nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.102/24 ipv4.gateway 192.168.0.1 ipv4.dns 192.168.0.101 connection.autoconnect yes
+----
+
+Restart Network Manager and bring up the connection:
+
+[source]
+----
+sudo systemctl restart NetworkManager
+nmcli con up 'Wired Connection'
+----
+
+Start the CoreOS installer, providing the `bootstrap.ign` ignition file:
+
+[source]
+----
+sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/bootstrap.ign /dev/sda --insecure-ignition --copy-network 
+----
+
+Reboot the VM with `reboot`, make sure the VM boots from the hard disk storage (eject the ISO before it boots) or `shutdown` the VM and remove the CD-ROM from the boot order.
+
+Make sure the VM boots up with the correct IP Address previously assigned:
+
+image::images/bootstrap-prompt.png[Bootstrap login prompt]
+
+Once the bootstrap node is up and at the login prompt with the correct IP Address, the VM should provision itself, and eventually come up in the load balancer http://192.168.0.101:9000/stats:
+
+image::images/bootstrap-lb.png[Bootstrap load balancer]
+
+From a Linux client you should be able to SSH to it using the private key generated earlier:
+
+[source]
+----
+ssh -i cluster_id_rsa core@192.168.0.102
+----
+
+Check the progress on the bootstrap node with:
+
+[source]
+----
+journalctl -b -f -u release-image.service -u bootkube.service
+----
+
+The following pods should eventually be up and running:
+
+[source]
+----
+sudo crictl pods
+
+...Ready               bootstrap-kube-scheduler-bootstrap.cluster.lab.com...            
+...Ready               bootstrap-kube-controller-manager-bootstrap.cluster.lab.com...   
+...Ready               bootstrap-kube-apiserver-bootstrap.cluster.lab.com...            
+...Ready               cloud-credential-operator-bootstrap.cluster.lab.com...            
+...Ready               bootstrap-cluster-version-operator-bootstrap.cluster.lab.com...   
+...Ready               bootstrap-machine-config-operator-bootstrap.cluster.lab.com...    
+...Ready               etcd-bootstrap-member-bootstrap.cluster.lab.com...               
+----
+
+List the running containers and tail the logs of any one:
+
+[source]
+----
+sudo crictl ps
+
+sudo crictl logs <CONTAINER_ID>
+----
+
+From the the Linux client the following command should return `ok`:
+
+[source]
+----
+curl -X GET https://api.cluster.lab.com:6443/healthz -k
+----
+
+Export the `kubeconfig` and test getting cluster operators with `oc get co`:
+
+[source]
+----
+export KUBECONFIG=cluster/auth/kubeconfig 
+oc get co
+----
+
+You'll only see the `cloud-credential` operator is available at this stage:
+
+[source]
+----
+NAME                        VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
+authentication                                                                            
+cloud-credential            True        False         False      26m
+cluster-autoscaler                                                               
+config-operator                                                                           
+console                                                                                   
+csi-snapshot-controller                                                                   
+dns                                                                                       
+etcd                       
+...
+----
+
+IMPORTANT: All of these tests *MUST* work as documented else it's pointless continuing any further.
+
+Any other responses or errors mean there are issues with either networking, DNS or Load Balancing configurations. Go back and troubleshoot any issues until you get the expected results at his stage.
+
+On your client you can see the progress of the installation and that it's moved on a step because api.cluster.lab.com is up and working:
+
+[source]
+----
+openshift-install --dir=cluster wait-for bootstrap-complete
+----
+
+[source]
+----
+INFO Waiting up to 20m0s for the Kubernetes API at https://api.cluster.lab.com:6443... 
+INFO API v1.19.0+9f84db3 up                       
+INFO Waiting up to 30m0s for bootstrapping to complete... 
+----
+
+The bootstrapping process will not complete until all three master nodes have been provisioned. 
+
+==== Master nodes
+
+For physical host installations, write the `rhcos-installer.x86_64.iso` image to a USB pen drive.
+
+Use `fdisk` to identify existing storage devices on your system, then insert the USB pen drive, using `fdisk` again to identify the device:
+
+[source]
+----
+fdisk -l
+----
+
+[source%nowrap,bash]
+----
+[ ... output omitted ... ]
+Disk /dev/sda: 58.5 GiB, 62763565056 bytes, 122585088 sectors
+[ ... output omitted ... ]
+----
+
+Write the image to the device:
+
+[source]
+----
+sudo dd if=rhcos-installer.x86_64.iso of=/dev/sda status=progress; sync
+----
+
+The next steps repeat the process of booting the three physical nodes using the Red Hat CoreOS ISO. Make sure to use `master.ign`, and the right IP Address and hostname for each master node. In the case of an Intel NUC, `F10` is used to interrupt the host BIOS and select a boot device. 
+
+*`master1.cluster.lab.com`*
+
+Using the `rhcos-installer.x86_64.iso` USB device, boot the VM up, until you arrive at a command prompt:
+
+[source]
+----
+$[core@localhost ~]$
+----
+
+The VM will have an IP Address assigned via DHCP, we need to set a static IP.
+
+View current interface IP Address:
+
+[source]
+----
+ip a
+----
+
+View the connection:
+
+[source]
+----
+nmcli con show
+----
+
+Connection
+
+Set the IPAddress for the bootstrap node:
+
+[source%nowrap,bash]
+----
+nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.111/24 ipv4.gateway 192.168.0.1 ipv4.dns 192.168.0.101 connection.autoconnect yes
+----
+
+Restart Network Manager and bring up the connection:
+
+[source]
+----
+sudo systemctl restart NetworkManager
+nmcli con up 'Wired Connection'
+----
+
+Start the CoreOS installer, providing the `master.ign` ignition file:
+
+[source]
+----
+sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition --copy-network 
+----
+
+Reboot the VM with `reboot`, make sure the VM boots from the hard disk storage (eject the ISO before it boots) or `shutdown` the VM and remove the CD-ROM from the boot order.
+
+Hit `tab` at the RHCOS GRUB menu and add the following:
+
+
+[source%nowrap,bash]
+----
+ip=192.168.0.111::192.168.0.1:255.255.255.0:master1.cluster.lab.com:ens3:none
+nameserver=192.168.0.101
+----
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+[source%nowrap,bash]
+----
+coreos.inst=yes
+coreos.inst.install_dev=sda
+coreos.inst.image_url=http://192.168.0.101:8080/rhcos-metal.raw.gz
+coreos.inst.ignition_url=http://192.168.0.101:8080/master.ign
+ip=192.168.0.111::192.168.0.1:255.255.255.0:master1.cluster.lab.com:eno1:none:192.168.0.101
+nameserver=192.168.0.101
+----
+
+*`master2.cluster.lab.com`*
+
+[source%nowrap,bash]
+----
+coreos.inst=yes
+coreos.inst.install_dev=sda
+coreos.inst.image_url=http://192.168.0.101:8080/rhcos-metal.raw.gz
+coreos.inst.ignition_url=http://192.168.0.101:8080/master.ign
+ip=192.168.0.112::192.168.0.1:255.255.255.0:master2.cluster.lab.com:eno1:none:192.168.0.101
+nameserver=192.168.0.101
+----
+
+*`master3.cluster.lab.com`*
+
+[source%nowrap,bash]
+----
+coreos.inst=yes
+coreos.inst.install_dev=sda
+coreos.inst.image_url=http://192.168.0.101:8080/rhcos-metal.raw.gz
+coreos.inst.ignition_url=http://192.168.0.101:8080/master.ign
+ip=192.168.0.113::192.168.0.1:255.255.255.0:master3.cluster.lab.com:eno1:none:192.168.0.101
+nameserver=192.168.0.101
+----
+
+// This is a comment and won't be rendered.
