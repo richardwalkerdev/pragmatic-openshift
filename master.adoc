@@ -1,0 +1,23 @@
+= AsciiDoc Book Template
+:author: Your Name
+:email: me@email.com
+:revnumber: 1.0
+:toc: left
+:toclevels: 5
+:icons: font
+:stem: latexmath
+:quick-uri: https://asciidoctor.org/docs/asciidoc-syntax-quick-reference/
+:lang: en
+:stylesheet: css/custom.css
+
+
+[preface]
+include::common/preface.adoc[]
+
+
+== Introduction
+
+include::chapters/introduction.adoc[]
+
+
+// This is a comment and won't be rendered.
