@@ -1,0 +1,120 @@
+=== LOCAL STORAGE
+
+Using the local storage operator deals with adding real disks, block storage to nodes.
+
+Prior to OCP 4.6, a project needed to be created manually:
+
+[source%nowrap,bash]
+----
+oc new-project local-storage
+----
+
+To enable local storage on all nodes including masters and infras:
+
+[source%nowrap,bash]
+----
+oc annotate project local-storage openshift.io/node-selector=''
+----
+
+Navigate to *Operators → OperatorHub*, type "Local Storage" into the filter box to locate the Local Storage Operator which now creates `openshift-local-storage` project namespace. 
+
+==== Local storage class
+
+Like with NFS, next create a new custom storage class for local block storage:
+
+[source%nowrap,bash]
+----
+vi local-storage-class.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-sc
+provisioner: no-provisioner
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  diskformat: thin
+----
+
+[source%nowrap,bash]
+----
+oc create -f local-storage-class.yaml
+----
+
+See storage classes via the web console *Storage → Storage Classes*
+
+==== Adding block storage
+
+Adding disks to servers is either physical activity, or a simple case of adding disks to VMs in which ever virtualization in use. 
+
+Once block storage is added, determine the device paths for the new devices, SSH to each node and use `fdisk -l` to see devices. 
+
+[source%nowrap,bash]
+----
+ssh -i cluster_id_rsa core@192.168.0.111
+sudo fdisk -l
+----
+
+Commonly, new devices will begin with `/dev/sdb` (`sda` used by RHCOS).
+
+Its good practice to manage each node because paths might differ depending on the environment. 
+
+Assuming three infra nodes, each with a new 50GB disk attached, here is infra1:
+
+[source%nowrap,bash]
+----
+vi local-disks-infra1.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: "local.storage.openshift.io/v1"
+kind: "LocalVolume"
+metadata:
+  name: "local-disks-i1"
+  namespace: "openshift-local-storage"
+spec:
+  nodeSelector:
+    nodeSelectorTerms:
+    - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - infra1.cluster.lab.com
+  storageClassDevices:
+    - storageClassName: "local-sc"
+      volumeMode: Filesystem
+      fsType: xfs
+      devicePaths:
+        - /dev/sdb
+----
+
+[source%nowrap,bash]
+----
+oc create -f local-disks-infra1.yaml
+----
+
+In a short time, see the PVs appear:
+
+[source%nowrap,bash]
+----
+oc get pv
+----
+
+[source%nowrap,bash]
+----
+NAME                CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM STORAGECLASS   REASON   AGE
+local-pv-297ca047   50Gi       RWO            Retain           Available         local-sc                53s
+local-pv-dc609890   50Gi       RWO            Retain           Available         local-sc                63s
+local-pv-fe609342   50Gi       RWO            Retain           Available         local-sc                70s
+----
+
+Navigate to *Administration -> Custom Resource Definitions -> LocalVolume -> Instances* to view Local Volumes.
+
+Repeat this process for each node in the cluster that needs local block storage made available. 
+
+// This is a comment and won't be rendered.

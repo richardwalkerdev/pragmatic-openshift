@@ -1,0 +1,209 @@
+=== IDENTITY PROVIDERS
+
+It is essential to break down OpenShift components and concepts into digestible chunks and avoid the risk of being overwhelmed with complexity.
+
+* An Identity provider deals with the *authentication* layer and is responsible for identifying a user.
+* The *authorisation* layer determines if requests are honoured, Role-based access control (RBAC) policy determines what a user is authorised to do.
+
+The combination of groups and roles deals with *authorisation*.
+
+==== HTPasswd
+
+On a Linux client install the tools:
+
+[source%nowrap,bash]
+----
+dnf install httpd-tools -y
+----
+
+Create an HTPasswd file containing users:
+
+[source%nowrap,bash]
+----
+htpasswd -c -B -b users.htpasswd admin changeme
+htpasswd -b users.htpasswd tom changeme
+htpasswd -b users.htpasswd dick changeme
+htpasswd -b users.htpasswd harry changeme
+----
+
+Which should look something like this:
+
+[source%nowrap,bash]
+----
+cat users.htpasswd 
+----
+
+[source%nowrap,bash]
+----
+admin:$2y$05$GTvOfcm2An9XdAIyDtwzGOvjGrroac78.NHrDdySO0KOBKAPaYGgi
+tom:$apr1$kouuYCYa$wlB2AB4.Ykxn/4QgHUtD9.
+dick:$apr1$IETeTG0v$g0P0gqR6aQJTCaGS15QWa0
+harry:$apr1$qhyrJZzc$HBCYSf9OFHRpM6he0LJ9k.
+----
+
+The following command runs locally and generates the needed yaml file for OpenShift:
+
+[source%nowrap,bash]
+----
+oc create secret generic htpasswd-secret --from-file=htpasswd=users.htpasswd -n openshift-config -o yaml --dry-run=client > htpasswd-secret.yaml
+----
+
+Which can then be used to create or replace the secret:
+
+[source%nowrap,bash]
+----
+oc create -f htpasswd-secret.yaml
+----
+
+[source%nowrap,bash]
+----
+oc replace -f htpasswd-secret.yaml
+----
+
+For reference, is you wish to extract an existing htpasswd file out of OpenShift use the following:
+
+[source%nowrap,bash]
+----
+oc get secret htpasswd-secret -ojsonpath={.data.htpasswd} -n openshift-config | base64 -d > test.htpasswd
+----
+
+Next, either via the web console, *Administration -> Cluster Settings -> Global Configuration -> OAuth -> YAML*
+
+Or via the command line:
+
+[source%nowrap,bash]
+----
+vi oauth.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - name: htpasswd_provider
+    mappingMethod: claim
+    type: HTPasswd
+    htpasswd:
+      fileData:
+        name: htpasswd-secret
+----
+
+[source%nowrap,bash]
+----
+oc replace -f oauth.yaml
+----
+
+==== Cluster admin
+
+Using RBAC to add the role `cluster-admin` to the new admin account:
+
+[source%nowrap,bash]
+----
+oc adm policy add-cluster-role-to-user cluster-admin admin
+----
+
+If the account has not being used to log into the cluster a warning will display:
+
+[source%nowrap,bash]
+----
+Warning: User 'admin' not found
+clusterrole.rbac.authorization.k8s.io/cluster-admin added: "admin"
+----
+
+Log into OpenShift for each user first to "create the user" in OpenShift and avoid the warning.
+
+[source%nowrap,bash]
+----
+oc adm policy add-cluster-role-to-user edit tom
+----
+
+[source%nowrap,bash]
+----
+clusterrole.rbac.authorization.k8s.io/edit added: "tom"
+----
+
+You can also add users limited to projects:
+
+[source%nowrap,bash]
+----
+oc adm policy add-role-to-user edit harry -n logging-sensitive-data
+----
+
+==== Remove kubeadmin
+
+OpenShift clusters are deployed with an install generated `kubeadmin` account. Once identity providers are fully configured it is recommend security best practice to remove this default account.
+
+The `kubeadmin` password is stored in `cluster/auth/kubeadmin-password`.
+
+Ensuring you have added at least one other user with `cluster-admin` role, the `kubeadmin` account can be removed using:
+
+[source%nowrap,bash]
+----
+oc delete secrets kubeadmin -n kube-system
+----
+
+==== LDAP
+
+===== Deploy LDAP
+
+This process covers deploying an application using container images. In this case deploying a basic LDAP service for testing identity providers. Such a service would always be external to the cluster. Using this image by Rafael Römhild here https://github.com/rroemhild/docker-test-openldap 
+
+On another host on the same subnet as the cluster and load balancer, pull the image:
+
+[source%nowrap,bash]
+----
+podman pull docker.io/rroemhild/test-openldap
+----
+
+Create a pod:
+
+[source%nowrap,bash]
+----
+podman pod create -p 389 -p 636 -n ldappod
+----
+
+CAUTION: If you see an error error from `slirp4netns while setting up port redirection: map[desc:bad request: add_hostfwd: slirp_add_hostfwd failed]` you need to add the following kernel parameter
+
+[source%nowrap,bash]
+----
+vi /etc/sysctl.conf
+----
+[source%nowrap,bash]
+----
+net.ipv4.ip_unprivileged_port_start = 0
+----
+[source%nowrap,bash]
+----
+sudo sysctl -p
+----
+
+Launch the container:
+
+[source%nowrap,bash]
+----
+podman run --privileged -d --pod ldappod rroemhild/test-openldap
+----
+
+Open the firewall ports for LDAP for accessing it directly from external hosts:
+
+[source%nowrap,bash]
+----
+firewall-cmd --permanent --add-port=389/tcp
+firewall-cmd --permanent --add-port=636/tcp
+firewall-cmd --reload
+----
+
+Test the service locally:
+
+[source%nowrap,bash]
+----
+ldapsearch -h 127.0.0.1 -p 389 -D cn=admin,dc=planetexpress,dc=com -w GoodNewsEveryone -b "dc=planetexpress,dc=com" -s sub "(objectclass=*)"
+----
+
+
+
+// This is a comment and won't be rendered.

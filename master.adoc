@@ -22,5 +22,13 @@ include::chapters/infrastructure.adoc[]
 include::chapters/prerequisites.adoc[]
 include::chapters/installation.adoc[]
 include::chapters/nodes.adoc[]
+include::chapters/ntp.adoc[]
+include::chapters/image-registry.adoc[]
+include::chapters/local-storage.adoc[]
+include::chapters/logging.adoc[]
+include::chapters/certificates.adoc[]
+include::chapters/identity-providers.adoc[]
+
+include::chapters/summary.adoc[]
 
 // This is a comment and won't be rendered.

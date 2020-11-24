@@ -1,0 +1,122 @@
+=== NTP/CHRONY
+
+In a lab environment, `chronyd` will be already configured on nodes with the default `pool 2.rhel.pool.ntp.org iburst`. Should the configuration need to be changed, the process involves adding MachineConfig. Machine Configs are found via the Web Console under *Compute -> Machine Config*. Think of Machine Configs as configuration management for the cluster.
+
+SSH to a master node and switch to root, for example:
+
+[source%nowrap,bash]
+----
+ssh -i cluster_id_rsa core@192.168.0.111
+sudo su -
+----
+
+Get a working minimalistic `chrony.conf`:
+
+[source%nowrap,bash]
+----
+grep -v -e '^#' -e '^$' /etc/chrony.conf > chrony.conf
+----
+
+On a client make a copy of the `chrony.conf` configuration file:
+
+[source%nowrap,bash]
+----
+vi chrony.conf
+----
+
+[source%nowrap,bash]
+----
+pool 2.rhel.pool.ntp.org iburst
+driftfile /var/lib/chrony/drift
+makestep 1.0 3
+rtcsync
+keyfile /etc/chrony.keys
+leapsectz right/UTC
+logdir /var/log/chrony
+----
+
+Encoded the file:
+
+[source%nowrap,bash]
+----
+base64 chrony.conf > chrony.conf.encoded
+----
+
+Create a MachineConfig for worker nodes, pasting in the chrony.conf.encoded content:
+
+[source%nowrap,bash]
+----
+vi worker-chrony.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: worker-chrony
+spec:
+  config:
+    ignition:
+      version: 2.2.0
+    storage:
+      files:
+      - contents:
+          source: data:text/plain;charset=utf-8;base64,cG9vbCAyLnJoZWwucG9vbC5udHAub3JnIGlidXJzdApkcmlmdGZpbGUgL3Zhci9saWIvY2hyb255L2RyaWZ0Cm1ha2VzdGVwIDEuMCAzCnJ0Y3N5bmMKa2V5ZmlsZSAvZXRjL2Nocm9ueS5rZXlzCmxlYXBzZWN0eiByaWdodC9VVEMKbG9nZGlyIC92YXIvbG9nL2Nocm9ueQo=
+          verification: {}
+        filesystem: root
+        mode: 0644
+        path: /etc/chrony.conf
+----
+
+CAUTION: Applying the configuration causes nodes to schedule a reboot, expect each worker node to bounce in sequence.
+
+[source%nowrap,bash]
+----
+watch oc get nodes
+----
+
+[source%nowrap,bash]
+----
+oc create -f worker-chrony.yaml
+----
+
+And repeat for master:
+
+[source%nowrap,bash]
+----
+vi master-chrony.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: master-chrony
+spec:
+  config:
+    ignition:
+      version: 2.2.0
+    storage:
+      files:
+      - contents:
+          source: data:text/plain;charset=utf-8;base64,cG9vbCAyLnJoZWwucG9vbC5udHAub3JnIGlidXJzdApkcmlmdGZpbGUgL3Zhci9saWIvY2hyb255L2RyaWZ0Cm1ha2VzdGVwIDEuMCAzCnJ0Y3N5bmMKa2V5ZmlsZSAvZXRjL2Nocm9ueS5rZXlzCmxlYXBzZWN0eiByaWdodC9VVEMKbG9nZGlyIC92YXIvbG9nL2Nocm9ueQo=
+          verification: {}
+        filesystem: root
+        mode: 0644
+        path: /etc/chrony.conf
+----
+
+CAUTION: Remeber, applying the configuration causes nodes to schedule a reboot, expect each master node to bounce in sequence.
+
+[source%nowrap,bash]
+----
+oc create -f master-chrony.yaml
+----
+
+// This is a comment and won't be rendered.

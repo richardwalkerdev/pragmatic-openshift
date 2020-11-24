@@ -1,0 +1,399 @@
+=== CERTIFICATES
+
+Replicate a local Certificate Authority (CA) for generating SSL certificates and applying them to OpenShift. The first step is to generate a root certificate and a private key. Then add the root certificate to any host, and then certificates generated and signed will be inherently trusted.
+
+==== Local CA
+
+On a local Linux client, Generate a private key, you'll be prompted for a pass phrase:
+
+[source%nowrap,bash]
+----
+openssl genrsa -des3 -out local_ca.key 2048
+----
+
+[source%nowrap,bash]
+----
+Generating RSA private key, 2048 bit long modulus (2 primes)
+.............+++++
+.......................................................................................................................+++++
+e is 65537 (0x010001)
+Enter pass phrase for local_ca.key: changeme
+Verifying - Enter pass phrase for local_ca.key: changeme
+----
+
+Which generated a private key file `local_ca.key`.
+
+Generate a root certificate:
+
+[source%nowrap,bash]
+----
+openssl req -x509 -new -nodes -key local_ca.key -sha256 -days 1825 -out local_ca.pem
+----
+
+Enter the password you just set and I used the following bogus details:
+
+[source%nowrap,bash]
+----
+Country Name (2 letter code) [XX]:UK
+State or Province Name (full name) []:CA County
+Locality Name (eg, city) [Default City]:CA City
+Organization Name (eg, company) [Default Company Ltd]:Local Certificate Authority
+Organizational Unit Name (eg, section) []:CA Unit
+Common Name (eg, your name or your server's hostname) []:ca.local
+Email Address []:noreply@ca.local
+----
+
+View root certificate:
+
+[source%nowrap,bash]
+----
+openssl x509 -in local_ca.pem --text
+----
+
+==== Install root certificate
+
+On a local Linux RHEL 8/CentOS 8 client:
+
+[source%nowrap,bash]
+----
+sudo cp local_ca.pem /etc/pki/ca-trust/source/anchors/
+----
+
+[source%nowrap,bash]
+----
+update-ca-trust extract
+----
+
+==== Signed certificate
+
+Create a private key:
+
+[source%nowrap,bash]
+----
+openssl genrsa -out cluster.lab.com.key 2048
+----
+
+Create a CSR, with a Common Name (CN) in this case `c`luster.lab.com`:
+
+[source%nowrap,bash]
+----
+openssl req -new -key cluster.lab.com.key -out cluster.lab.com.csr
+----
+
+NOTE: This example relies on the `alt_names`, you might wish to create two certificates with the Common Names `*.apps.cluster.lab.com` and `api.cluster.lab.com`.
+
+[source%nowrap,bash]
+----
+Country Name (2 letter code) [XX]:UK
+State or Province Name (full name) []:OCP County
+Locality Name (eg, city) [Default City]:OCP City
+Organization Name (eg, company) [Default Company Ltd]:OpenShift Container Platform
+Organizational Unit Name (eg, section) []:OCP Unit
+Common Name (eg, your name or your server's hostname) []:cluster.lab.com
+Email Address []:noreply@cluster.lab.com
+
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []: 
+An optional company name []:
+----
+
+Create a configuration file needed to define the Subject Alternative Name (SAN) extension, this allows multiple, alternative DNS validations. For OpenShift there are two required, one for the ingress traffic for users to access application deployed. The second is for the API. This method means the one certificate can be used for both cases.
+
+[source%nowrap,bash]
+----
+vi cluster.lab.com.ext
+----
+
+[source%nowrap,bash]
+----
+authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = *.apps.cluster.lab.com
+DNS.2 = api.cluster.lab.com
+----
+
+Create the certificate, you'll be prompted for the root certificate password again:
+
+[source%nowrap,bash]
+----
+openssl x509 -req -in cluster.lab.com.csr -CA local_ca.pem -CAkey local_ca.key -CAcreateserial -out cluster.lab.com.crt -days 825 -sha256 -extfile cluster.lab.com.ext
+----
+
+You should have all these files:
+
+[source%nowrap,bash]
+----
+cluster.lab.com.crt
+cluster.lab.com.csr
+cluster.lab.com.ext
+cluster.lab.com.key
+local_ca.key
+local_ca.pem
+local_ca.srl
+----
+
+An addition recommended, yet optional step is the add the root certificate at the end of the new client certificate file:
+
+[source%nowrap,bash]
+----
+cat local_ca.pem >> cluster.lab.com.crt
+----
+
+View the final certificate:
+
+[source%nowrap,bash]
+----
+openssl x509 -in cluster.lab.com.crt -text
+----
+
+Verify the certificate:
+
+[source%nowrap,bash]
+----
+openssl verify -CAfile local_ca.pem cluster.lab.com.crt
+----
+
+[source%nowrap,bash]
+----
+cluster.lab.com.crt: OK
+----
+
+==== Ingress certificate
+
+Create a secret in the *`openshift-ingress`* name-space containing both the certificate and private key:
+
+[source%nowrap,bash]
+----
+oc create secret tls apps-cert --cert=cluster.lab.com.crt --key=cluster.lab.com.key -n openshift-ingress
+----
+
+And apply the patch, make sure the name matches the name of the secret just added, in this case `apps-cert`:
+
+[source%nowrap,bash]
+----
+oc patch ingresscontroller.operator default --type=merge -p '{"spec":{"defaultCertificate": {"name": "apps-cert"}}}' -n openshift-ingress-operator
+----
+
+To view the changes taking place:
+
+[source%nowrap,bash]
+----
+oc project openshift-ingress
+----
+
+You should see the two route pods rebuild:
+
+[source%nowrap,bash]
+----
+oc get pods
+----
+
+[source%nowrap,bash]
+----
+NAME                             READY   STATUS    RESTARTS   AGE
+router-default-8d9fbbfb7-55xpt   1/1     Running   0          102s
+router-default-8d9fbbfb7-w6zhn   1/1     Running   0          118s
+----
+
+==== API certificate
+
+Create a secret in the *`openshift-config`* name-space containing both the certificate and private key:
+
+[source%nowrap,bash]
+----
+oc create secret tls api-cert --cert=cluster.lab.com.crt --key=cluster.lab.com.key -n openshift-config
+----
+
+Again, apply the patch, making sure the name matches the name of the secret just added, in this case `api-cert`, and the domain matches you API URL in this case `api.cluster.lab.com`:
+
+[source%nowrap,bash]
+----
+oc patch apiserver cluster --type=merge -p '{"spec":{"servingCerts": {"namedCertificates":[{"names": ["api.cluster.lab.com"], "servingCertificate": {"name": "api-cert"}}]}}}'
+----
+
+To see the effect of the previous patch:
+
+[source%nowrap,bash]
+----
+oc get apiserver cluster -o yaml
+----
+
+[source%nowrap,bash]
+----
+spec:
+  servingCerts:
+    namedCertificates:
+    - names:
+      - api.cluster.lab.com
+      servingCertificate:
+        name: api-cert
+----
+
+To view the changes taking place:
+
+[source%nowrap,bash]
+----
+oc project openshift-kube-apiserver
+oc get pods
+----
+
+You should see three `kube-apiserver` pods redeploy (this took a while for me):
+
+[source%nowrap,bash]
+----
+kube-apiserver-master1.cluster.lab.com       4/4     Running     0          3m58s
+kube-apiserver-master2.cluster.lab.com       4/4     Running     0          10m
+kube-apiserver-master3.cluster.lab.com       4/4     Running     0          7m11s
+----
+
+Once all three pods have complete redeployment, check and validate the certificate has been applied:
+
+[source%nowrap,bash]
+----
+openssl s_client -connect api.cluster.lab.com:6443
+----
+
+And/or:
+
+[source%nowrap,bash]
+----
+curl -vvI https://api.cluster.lab.com:6443
+----
+
+Sometimes the trusted certs on a client doesn't take full effect, you can provide the CA certificate explicitly:
+
+[source%nowrap,bash]
+----
+curl --cacert local_ca.pem -vvI https://api.cluster.lab.com:6443
+----
+
+Test logging in:
+
+[source%nowrap,bash]
+----
+oc login -u admin -p changme https://api.cluster.lab.com:6443
+----
+
+Another trick is to specify your certificate-authority certificate:
+
+[source%nowrap,bash]
+----
+oc login --certificate-authority=ca.crt https://api.cluster.lab.com:6443
+----
+
+==== Replace certificates
+
+To replace certificates the following commands can be used:
+
+Example for ingress (*.apps):
+
+[source%nowrap,bash]
+----
+oc create secret tls apps-cert --cert=api.cluster.lab.com.crt --key=api.cluster.lab.com.key -n openshift-ingress --dry-run=client -o yaml| oc replace -f -
+----
+
+Example for api:
+
+[source%nowrap,bash]
+----
+oc create secret tls api-cert --cert=api.cluster.lab.com.crt --key=api.cluster.lab.com.key -n openshift-config --dry-run=client -o yaml| oc replace -f -
+----
+
+==== Add CA Bundle
+
+Using your CA certificate:
+
+[source%nowrap,bash]
+----
+vi user-ca-bundle.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: v1
+data:
+  ca-bundle.crt: | 
+    -----BEGIN CERTIFICATE-----
+    MIIEKTCCAxGgAwIBAgIUTO5Cn1LKQtoaWrfcOnHSdRBmpvwwDQYJKoZIhvcNAQEL
+    BQAwgaMxCzAJBgNVBAYTAlVLMRMwEQYDVQQIDApPQ1AgQ291bnR5MREwDwYDVQQH
+    DAhPQ1AgQ2l0eTElMCMGA1UECgwcT3BlblNoaWZ0IENvbnRhaW5lciBQbGF0Zm9y
+    bTERMA8GA1UECwwIT0NQIFVuaXQxETAPBgNVBAMMCGNhLmxvY2FsMR8wHQYJKoZI
+    hvcNAQkBFhBub3JlcGx5QGNhLmxvY2FsMB4XDTIwMTExMjE1NDYxNVoXDTI1MTEx
+    MTE1NDYxNVowgaMxCzAJBgNVBAYTAlVLMRMwEQYDVQQIDApPQ1AgQ291bnR5MREw
+    DwYDVQQHDAhPQ1AgQ2l0eTElMCMGA1UECgwcT3BlblNoaWZ0IENvbnRhaW5lciBQ
+    bGF0Zm9ybTERMA8GA1UECwwIT0NQIFVuaXQxETAPBgNVBAMMCGNhLmxvY2FsMR8w
+    HQYJKoZIhvcNAQkBFhBub3JlcGx5QGNhLmxvY2FsMIIBIjANBgkqhkiG9w0BAQEF
+    AAOCAQ8AMIIBCgKCAQEAuSidKVFVoKFv3QBHTTgjfhPyvsL4O8H530ehb7iap71b
+    Bw2bzxSnrB84Vh4EeZ+pF4cAfK8jquvq2kJjPOGzuflc0aAVWzq6DYJLGRP5T6Sw
+    v8Zzlnf0EwSBQRxKs3MNlfM36uRkJMsTxxlKYsBsMP51bT9PNYzPqQ6WcDZyclf+
+    OGhnb2uUDud9oGLVapeHfibiyfSahgnnds3UyjWtYUP3sgWDPCKOpXIqFGcCqdfs
+    rgRndEq6Leu3/yxnxNwQmB5v3+XAUybUSU8U+cJDYrsyxu5wtYDI75Eo6ocIbVxx
+    T+waMwQPLhzMv8YfhNn91l4S0lHR5GL1c7RY3ms+xQIDAQABo1MwUTAdBgNVHQ4E
+    FgQURK6H+pSQSQqce0NyZiEbVjbCdukwHwYDVR0jBBgwFoAURK6H+pSQSQqce0Ny
+    ZiEbVjbCdukwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAhMRz
+    F+e6pV7eQXyyiExIMoTI3hqubsRTANmNbXkNBrCRswUoe7T1F3146G9B2wAFQAtH
+    vda4NcS+i1yW4QG0cgnfJRcPsRnTSEmezia4aHn7vUW3oA8HGL47zc+tlQPV6EKd
+    hjtdH8R2GIB5CeBhEp1I9DuX2owWEemAnrZxfGjQJxTvCEOprkCJBzozNumwMhZZ
+    gmzBUeKYbQHVH0oGATGqKph8X36NGPtUdIDY80INThMS0XvvH7fndX1HOEuB37mn
+    UW7CPsnoMWXf8SsPon4g6aMuKsDpKUqsuvT3RNFHofZIBnqXdCYzbdYbzrZ5ppBH
+    sx3KXS6+lZijVVMwoA==
+    -----END CERTIFICATE-----
+kind: ConfigMap
+metadata:
+  name: user-ca-bundle 
+  namespace: openshift-config 
+----
+
+[source%nowrap,bash]
+----
+oc create -f user-ca-bundle.yaml
+----
+
+Now edit the cluster proxy configuration (even though a proxy might not be in use):
+
+[source%nowrap,bash]
+----
+oc edit proxy/cluster
+----
+
+CAUTION: This causes a scheduled reboot of all your nodes.
+
+Replace the `spec:` with:
+
+[source%nowrap,bash]
+----
+spec:
+  trustedCA:
+    name: user-ca-bundle
+----
+
+This change is a Machine Config and adds the bundle to each nodes `ca-trust`:
+
+SSH to a node, for example:
+
+[source%nowrap,bash]
+----
+ssh -i cluster_id_rsa core@192.168.0.111
+sudo su -
+----
+
+The following file gets updated with your certificates:
+
+[source%nowrap,bash]
+----
+/etc/pki/ca-trust/source/anchors/openshift-config-user-ca-bundle.crt
+----
+
+[source%nowrap,bash]
+----
+openssl x509 -in openshift-config-user-ca-bundle.crt --text
+----
+
+Once all the nodes reboot your ca-bundle is included. 
+
+// This is a comment and won't be rendered.

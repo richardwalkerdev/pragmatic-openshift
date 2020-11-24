@@ -1,0 +1,343 @@
+=== IMAGE REGISTRY
+
+In typical OpenShift deployments, using a cloud provider with credentials, storage classes will be made available for the target infrastructure. In a bare-metal situation, this is not a luxury. It is simple to define NFS for shared storage, which is OK for specific services and tasks but something like logging; performance will take a hit.
+It is possible to add physical block devices to nodes and use the "Local Storage Operator". However, local storage volumes are fixed to nodes, so moving pods that depend on block storage will run into difficulties, not being able to mount storage to different nodes on demand.
+
+For the image registry, NFS shared storage is the right choice. 
+
+==== NFS server
+
+Using a RHEL/CentOS 8.2 host on the same network as your OpenShift Cluster install `nfs-utils`:
+
+[source%nowrap,bash]
+----
+sudo dnf install nfs-utils -y
+----
+
+[source%nowrap,bash]
+----
+systemctl start nfs-server
+systemctl enable nfs-server
+systemctl status nfs-server
+----
+
+[source%nowrap,bash]
+----
+sudo mkdir -p /mnt/openshift/registry
+----
+
+[source%nowrap,bash]
+----
+vi /etc/exports
+----
+
+Add the following, including the options for `rw,no_wdelay,no_root_squash`:
+
+[source%nowrap,bash]
+----
+/mnt/openshift/registry         192.168.0.1/24(rw,sync,no_wdelay,no_root_squash,insecure)
+----
+
+Export the new share with:
+
+[source%nowrap,bash]
+----
+exportfs -arv
+----
+
+And confirm the share is visible:
+
+[source%nowrap,bash]
+----
+exportfs  -s
+showmount -e 127.0.0.1
+----
+
+If required, open up the firewall ports needed:
+
+[source%nowrap,bash]
+----
+firewall-cmd --permanent --add-service=nfs
+firewall-cmd --permanent --add-service=rpc-bind
+firewall-cmd --permanent --add-service=mountd
+firewall-cmd --reload
+----
+
+==== NFS storage class
+
+Add a storage class with the no-provisioner option, making it a manual process:
+
+[source%nowrap,bash]
+----
+vi nfs-storage-class.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs
+provisioner: no-provisioner
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true
+----
+
+[source%nowrap,bash]
+----
+oc create -f nfs-storage-class.yaml
+----
+
+See storage classes via the web console *Storage -> Storage Classes*
+
+==== Configuration
+
+You can now add persistent volume(s) (PV) using the `nfs` storage class:
+
+[source%nowrap,bash]
+----
+vi registry-pv.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: registry-pv
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+  - ReadWriteMany
+  nfs:
+    path: /mnt/openshift/registry
+    server: 192.168.0.15
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+----
+
+[source%nowrap,bash]
+----
+oc create -f registry-pv.yaml
+----
+
+And view the result:
+
+[source%nowrap,bash]
+----
+oc get pv
+----
+
+[source%nowrap,bash]
+----
+NAME          CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+registry-pv   50Gi       RWX            Retain           Available           nfs                     3s
+----
+
+To update the registry storage, you can add a persistent volume claim (PVC) using the new NFS storage class:
+
+[source%nowrap,bash]
+----
+vi registry-pvc.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: image-registry-storage
+  namespace: openshift-image-registry
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: nfs
+----
+
+[source%nowrap,bash]
+----
+oc create -f registry-pvc.yaml
+----
+
+TIP: The default name for the pvc created is `image-registry-storage` which is a known here.
+
+Switch to the `openshift-image-registry` project and view the pending PVC:
+
+[source%nowrap,bash]
+----
+oc project openshift-image-registry
+oc get pvc
+----
+
+It will be currently pending:
+
+[source%nowrap,bash]
+----
+NAME                     STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+image-registry-storage   Pending                                      nfs            15s
+----
+
+And edit the image registry configuration:
+
+[source%nowrap,bash]
+----
+oc edit configs.imageregistry.operator.openshift.io
+----
+
+Three things need changing under `spec:` include `managementState`, `replicas` and `storage`:
+
+[source%nowrap,bash]
+----
+...
+  managementState: Managed
+...
+...
+  replica: 3
+...
+...
+  storage:
+    pvc:
+      claim: image-registry-storage
+----
+
+You can check the state/progress of these changes by viewing the pods:
+
+[source%nowrap,bash]
+----
+oc project openshift-image-registry
+oc get pods
+----
+
+[source%nowrap,bash]
+----
+NAME                                               READY   STATUS      RESTARTS   AGE
+cluster-image-registry-operator-6c55f65c7d-sst5g   2/2     Running     0          18h
+image-pruner-1605225600-cpm8d                      0/1     Completed   0          10h
+image-registry-659c75894d-28mp4                    1/1     Running     0          18h
+image-registry-659c75894d-5mx25                    1/1     Running     0          18h
+image-registry-659c75894d-zqxcq                    1/1     Running     0          18h
+node-ca-vj6ql                                      1/1     Running     0          3d
+node-ca-wjk57                                      1/1     Running     0          3d
+node-ca-ww946                                      1/1     Running     0          3d
+----
+
+And see the PVC has been claimed:
+
+[source%nowrap,bash]
+----
+oc get pvc
+----
+
+[source%nowrap,bash]
+----
+NAME                     STATUS   VOLUME        CAPACITY   ACCESS MODES   STORAGECLASS
+image-registry-storage   Bound    registry-pv   50Gi       RWX            nfs  
+----
+
+==== Expose registry
+
+Finally, you can expose the OpenShift image registry to enable you to work with it using Docker or Podman to tag and push images, make sure your in the `openshift-image-registry` project or add `-n openshift-image-registry` to include namespace with the command:
+
+[source%nowrap,bash]
+----
+oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
+----
+
+[source%nowrap,bash]
+----
+oc get routes
+----
+
+==== Migrate registry
+
+To move the image registry to run on infra nodes apply the follwoing patch:
+
+[source%nowrap,bash]
+----
+oc patch configs.imageregistry.operator.openshift.io/cluster -n openshift-image-registry --type=merge --patch '{"spec":{"nodeSelector":{"node-role.kubernetes.io/infra":""}}}'
+----
+
+Check where pods are running by adding `-o wide` to the following command:
+
+[source%nowrap,bash]
+----
+oc get pods -o wide
+----
+
+==== Troubleshooting
+
+===== No route to host
+
+If pods never get past `ContainerCreating`, use `oc describe pod` to see details:
+
+[source%nowrap,bash]
+----
+oc project openshift-image-registry
+oc get pods
+oc describe pod image-registry-5cc87cc5b8-4k6l6
+----
+
+If you see:
+
+[source%nowrap,bash]
+----
+mount.nfs: No route to host
+----
+
+It's either the PV is is configured incorrectly, pointing to a wrong NFS server or the NFS server/share is being blocked by a firewall or unavailable. 
+
+===== Unexpected status
+
+If you see errors with OpenShift deployments later like this:
+
+[source%nowrap,bash]
+----
+Registry server Address: 
+Registry server User Name: serviceaccount
+Registry server Email: serviceaccount@example.org
+Registry server Password: <<non-empty>>
+error: build error: Failed to push image: error copying la... received unexpected HTTP status: 500 Internal Server Error
+----
+
+The permissions on the share directory need fixing:
+
+[source%nowrap,bash]
+----
+chmod 775 /mnt/openshift/registry
+----
+
+===== Undo storage config
+
+If you need to revert back to a known working configuration, you can make it ephemeral by replacing the registry storage with:
+
+[source%nowrap,bash]
+----
+oc edit configs.imageregistry.operator.openshift.io
+----
+
+[source%nowrap,bash]
+----
+  storage:
+    emptyDir: {}
+----
+
+Delete PVC:
+
+[source%nowrap,bash]
+----
+oc delete pvc image-registry-storage
+----
+
+Delete PV:
+
+[source%nowrap,bash]
+----
+oc delete pv registry-pv
+----
+
+// This is a comment and won't be rendered.

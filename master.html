@@ -507,33 +507,115 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <li><a href="#_openshift_4_6">OpenShift 4.6</a>
 <ul class="sectlevel2">
 <li><a href="#_introduction">Introduction</a></li>
-<li><a href="#_infrastructure">Infrastructure</a>
+<li><a href="#_infrastructure">INFRASTRUCTURE</a>
 <ul class="sectlevel3">
-<li><a href="#_architecture_overview">Architecture Overview</a></li>
+<li><a href="#_architecture_overview">Architecture overview</a></li>
 </ul>
 </li>
-<li><a href="#_prerequisites">Prerequisites</a>
+<li><a href="#_prerequisites">PREREQUISITES</a>
 <ul class="sectlevel3">
 <li><a href="#_raspberry_pi">Raspberry Pi</a></li>
 <li><a href="#_dns">DNS</a></li>
 <li><a href="#_haproxy">HAProxy</a></li>
-<li><a href="#_apache_web_server">Apache Web Server</a></li>
+<li><a href="#_apache_web_server">Apache web server</a></li>
 </ul>
 </li>
-<li><a href="#_installation">Installation</a>
+<li><a href="#_installation">INSTALLATION</a>
 <ul class="sectlevel3">
-<li><a href="#_client_tools">Client Tools</a></li>
+<li><a href="#_client_tools">Client tools</a></li>
+<li><a href="#_install_preparation">Install preparation</a></li>
 <li><a href="#_dependencies">Dependencies</a></li>
 <li><a href="#_bootstrap_node">Bootstrap node</a></li>
-<li><a href="#_master_nodes">Master nodes</a></li>
+<li><a href="#_master_nodes">Master nodes</a>
+<ul class="sectlevel4">
+<li><a href="#_master1_cluster_lab_com">master1.cluster.lab.com</a></li>
+<li><a href="#_master2_cluster_lab_com">master2.cluster.lab.com</a></li>
+<li><a href="#_master3_cluster_lab_com">master3.cluster.lab.com</a></li>
 </ul>
 </li>
-<li><a href="#_nodes">Nodes</a>
+<li><a href="#_completion">Completion</a></li>
+<li><a href="#_login">Login</a></li>
+<li><a href="#_troubleshooting">Troubleshooting</a>
+<ul class="sectlevel4">
+<li><a href="#_single_master">Single master</a></li>
+<li><a href="#_unknown_authority">Unknown authority</a></li>
+<li><a href="#_missing_console">Missing Console</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_nodes">NODES</a>
 <ul class="sectlevel3">
-<li><a href="#_infra">Infra</a></li>
-<li><a href="#_worker">Worker</a></li>
+<li><a href="#_infra_nodes">Infra nodes</a>
+<ul class="sectlevel4">
+<li><a href="#_label_infra_nodes">Label infra nodes</a></li>
 </ul>
 </li>
+<li><a href="#_worker_nodes">Worker nodes</a></li>
+<li><a href="#_move_ingress_router">Move ingress router</a></li>
+<li><a href="#_disable_master_scheduler">Disable master scheduler</a></li>
+<li><a href="#_delete_nodes">Delete nodes</a></li>
+</ul>
+</li>
+<li><a href="#_ntpchrony">NTP/CHRONY</a></li>
+<li><a href="#_image_registry">IMAGE REGISTRY</a>
+<ul class="sectlevel3">
+<li><a href="#_nfs_server">NFS server</a></li>
+<li><a href="#_nfs_storage_class">NFS storage class</a></li>
+<li><a href="#_configuration">Configuration</a></li>
+<li><a href="#_expose_registry">Expose registry</a></li>
+<li><a href="#_migrate_registry">Migrate registry</a></li>
+<li><a href="#_troubleshooting_2">Troubleshooting</a>
+<ul class="sectlevel4">
+<li><a href="#_no_route_to_host">No route to host</a></li>
+<li><a href="#_unexpected_status">Unexpected status</a></li>
+<li><a href="#_undo_storage_config">Undo storage config</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_local_storage">LOCAL STORAGE</a>
+<ul class="sectlevel3">
+<li><a href="#_local_storage_class">Local storage class</a></li>
+<li><a href="#_adding_block_storage">Adding block storage</a></li>
+</ul>
+</li>
+<li><a href="#_cluster_logging">CLUSTER LOGGING</a>
+<ul class="sectlevel3">
+<li><a href="#_ephemeral_logging">Ephemeral logging</a></li>
+<li><a href="#_local_storage_logging">Local storage logging</a></li>
+<li><a href="#_troubleshooting_3">Troubleshooting</a>
+<ul class="sectlevel4">
+<li><a href="#_insufficient_memory">Insufficient memory</a></li>
+<li><a href="#_delete_cluster_logging">Delete cluster logging</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_certificates">CERTIFICATES</a>
+<ul class="sectlevel3">
+<li><a href="#_local_ca">Local CA</a></li>
+<li><a href="#_install_root_certificate">Install root certificate</a></li>
+<li><a href="#_signed_certificate">Signed certificate</a></li>
+<li><a href="#_ingress_certificate">Ingress certificate</a></li>
+<li><a href="#_api_certificate">API certificate</a></li>
+<li><a href="#_replace_certificates">Replace certificates</a></li>
+<li><a href="#_add_ca_bundle">Add CA Bundle</a></li>
+</ul>
+</li>
+<li><a href="#_identity_providers">IDENTITY PROVIDERS</a>
+<ul class="sectlevel3">
+<li><a href="#_htpasswd">HTPasswd</a></li>
+<li><a href="#_cluster_admin">Cluster admin</a></li>
+<li><a href="#_remove_kubeadmin">Remove kubeadmin</a></li>
+<li><a href="#_ldap">LDAP</a>
+<ul class="sectlevel4">
+<li><a href="#_deploy_ldap">Deploy LDAP</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#_summary">SUMMARY</a></li>
 </ul>
 </li>
 </ul>
@@ -588,7 +670,7 @@ a system for automating deployment, scaling, and operations of application conta
 </div>
 </div>
 <div class="sect2">
-<h3 id="_infrastructure">Infrastructure</h3>
+<h3 id="_infrastructure">INFRASTRUCTURE</h3>
 <div class="paragraph">
 <p>Infrastructure is the compute resources that software platforms get deployed on to. Traditionally and as demonstrated in this documentation that can be physical hardware. It might mean virtualisation using hypervisors such as VMware, Red Hat Virtualisation or  Hyper-V for example. Most commonly, it will likely mean cloud infrastructure. Cloud infrastructure builds on virtualisation providing on-demand abstracted resources such as hardware,  storage, and network resources.</p>
 </div>
@@ -599,7 +681,7 @@ a system for automating deployment, scaling, and operations of application conta
 <p>This guide demonstrates using  Intel® NUC&#8217;s for master nodes, which are affordable, compact with low power consumption.  Furthermore, a Raspberry Pi used for the core utility services including DNS, Load Balancer and Apache webserver.</p>
 </div>
 <div class="sect3">
-<h4 id="_architecture_overview">Architecture Overview</h4>
+<h4 id="_architecture_overview">Architecture overview</h4>
 <div class="paragraph">
 <p>The following diagram is a high-level overview of the lab environment deployed in this document. It depicts both the physical hosts and virtual hosts that make up a hybrid cluster.  The virtual hosts include the temporary bootstrap host, only needed during the initial deployment of the three master nodes.</p>
 </div>
@@ -738,7 +820,7 @@ a system for automating deployment, scaling, and operations of application conta
 </div>
 </div>
 <div class="sect2">
-<h3 id="_prerequisites">Prerequisites</h3>
+<h3 id="_prerequisites">PREREQUISITES</h3>
 <div class="paragraph">
 <p>Getting the prerequisites right is the essential part of deploying OpenShift. Mistakes with DNS, load balancing or networking in general, will only lead problems with the deployment of the cluster. Troubleshooting OpenShift deployments is notoriously challenging and often misleading towards the real root cause of issues.</p>
 </div>
@@ -1195,7 +1277,7 @@ listen stats
 </div>
 </div>
 <div class="sect3">
-<h4 id="_apache_web_server">Apache Web Server</h4>
+<h4 id="_apache_web_server">Apache web server</h4>
 <div class="paragraph">
 <p>Install and configure <code>httpd</code> on port <code>8080</code> (because port 80 is already used by HAProxy)</p>
 </div>
@@ -1234,12 +1316,12 @@ listen stats
 </div>
 </div>
 <div class="sect2">
-<h3 id="_installation">Installation</h3>
+<h3 id="_installation">INSTALLATION</h3>
 <div class="paragraph">
 <p>At the time of writing the latest version is 4.6.4. The downloads necessary are publicly available however download a legitimate pull secret from the Red Hat cluster portal. Vising <a href="https://cloud.redhat.com/openshift/install/metal/user-provisioned" class="bare">https://cloud.redhat.com/openshift/install/metal/user-provisioned</a> for the latest versions and obtaining your pull secret.</p>
 </div>
 <div class="sect3">
-<h4 id="_client_tools">Client Tools</h4>
+<h4 id="_client_tools">Client tools</h4>
 <div class="paragraph">
 <p>Download the OpenShift installer program on your client computer:</p>
 </div>
@@ -1328,6 +1410,9 @@ tar -xvf openshift-install-linux.tar.gz -C ~/bin</code></pre>
 <pre class="highlight"><code>openshift-install 4.6.4</code></pre>
 </div>
 </div>
+</div>
+<div class="sect3">
+<h4 id="_install_preparation">Install preparation</h4>
 <div class="paragraph">
 <p>Create a working directory, for example:</p>
 </div>
@@ -1701,14 +1786,99 @@ Disk /dev/sda: 58.5 GiB, 62763565056 bytes, 122585088 sectors
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code>sudo dd if=rhcos-installer.x86_64.iso of=/dev/sda status=progress; sync</code></pre>
+<pre class="highlight nowrap"><code>sudo dd if=rhcos-installer.x86_64.iso of=/dev/sda status=progress; sync</code></pre>
 </div>
 </div>
 <div class="paragraph">
 <p>The next steps repeat the process of booting the three physical nodes using the Red Hat CoreOS ISO. Make sure to use <code>master.ign</code>, and the right IP Address and hostname for each master node. In the case of an Intel NUC, <code>F10</code> is used to interrupt the host BIOS and select a boot device.</p>
 </div>
+<div class="sect4">
+<h5 id="_master1_cluster_lab_com">master1.cluster.lab.com</h5>
 <div class="paragraph">
-<p><strong><code>master1.cluster.lab.com</code></strong></p>
+<p>Using the <code>rhcos-installer.x86_64.iso</code> USB device, boot the VM up, until you arrive at a command prompt:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>$[core@localhost ~]$</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The VM will have an IP Address assigned via DHCP, we need to set a static IP.</p>
+</div>
+<div class="paragraph">
+<p>View current interface IP Address:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>ip a</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>View the connection:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>nmcli con show</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Set the IP Address for the bootstrap node:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.111/24 ipv4.gateway 192.168.0.1 ipv4.dns 192.168.0.101 connection.autoconnect yes</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Restart Network Manager and bring up the connection:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>sudo systemctl restart NetworkManager
+nmcli con up 'Wired Connection'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Start the CoreOS installer, providing the <code>master.ign</code> ignition file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition --copy-network</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Reboot the VM with <code>reboot</code>, make sure the VM boots from the hard disk storage (remove the USB/ISO before it boots) or <code>shutdown</code> the VM and remove the CD-ROM from the boot order and power it back on.</p>
+</div>
+<div class="paragraph">
+<p>Hit <code>tab</code> at the RHCOS GRUB menu and add the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>ip=192.168.0.111::192.168.0.1:255.255.255.0:master1.cluster.lab.com:ens3:none nameserver=192.168.0.101</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Unable to provide a screenshot of a physical host GRUB configuration, here is the example when repeating this process for an infra node:</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/infra-grub.png" alt="GRUB">
+</div>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+It&#8217;s unclear why this step is needed but with nodes other than the <code>bootstrap</code> node, this intervention was required. There are better methods for provisioning nodes but this documentation is focused on the most fundamental approach.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Prior to OCP 4.6, all the CoreOS parameters where added at the GRUB stage, for reference here are the original parameters:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1720,8 +1890,35 @@ ip=192.168.0.111::192.168.0.1:255.255.255.0:master1.cluster.lab.com:eno1:none:19
 nameserver=192.168.0.101</code></pre>
 </div>
 </div>
+</div>
+<div class="sect4">
+<h5 id="_master2_cluster_lab_com">master2.cluster.lab.com</h5>
 <div class="paragraph">
-<p><strong><code>master2.cluster.lab.com</code></strong></p>
+<p>Repeat the process for the second master node:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.112/24 ipv4.gateway 192.168.0.1 ipv4.dns 192.168.0.101 connection.autoconnect yes</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>sudo systemctl restart NetworkManager
+nmcli con up 'Wired Connection'</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>ip=192.168.0.112::192.168.0.1:255.255.255.0:master2.cluster.lab.com:ens3:none nameserver=192.168.0.101</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Original bootstrap parameters:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1733,8 +1930,35 @@ ip=192.168.0.112::192.168.0.1:255.255.255.0:master2.cluster.lab.com:eno1:none:19
 nameserver=192.168.0.101</code></pre>
 </div>
 </div>
+</div>
+<div class="sect4">
+<h5 id="_master3_cluster_lab_com">master3.cluster.lab.com</h5>
 <div class="paragraph">
-<p><strong><code>master3.cluster.lab.com</code></strong></p>
+<p>Repeat the process for the third master node:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.113/24 ipv4.gateway 192.168.0.1 ipv4.dns 192.168.0.101 connection.autoconnect yes</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>sudo systemctl restart NetworkManager
+nmcli con up 'Wired Connection'</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>ip=192.168.0.113::192.168.0.1:255.255.255.0:master3.cluster.lab.com:ens3:none nameserver=192.168.0.101</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Original bootstrap parameters:</p>
 </div>
 <div class="listingblock">
 <div class="content">
@@ -1748,15 +1972,2176 @@ nameserver=192.168.0.101</code></pre>
 </div>
 </div>
 </div>
-<div class="sect2">
-<h3 id="_nodes">Nodes</h3>
 <div class="sect3">
-<h4 id="_infra">Infra</h4>
-
+<h4 id="_completion">Completion</h4>
+<div class="paragraph">
+<p>Once all three master nodes are provisioning the process can take some time to complete. As indicated by the installer INFO "Waiting up to 40m0s for bootstrapping to complete".</p>
+</div>
+<div class="paragraph">
+<p>The two key things to watch are the load balancers and cluster operators. Once the master node boots up to the login prompt, it will download a bunch of images and do some initial installation, and the host will perform a reboot and come back to the login prompt during this process.</p>
+</div>
+<div class="paragraph">
+<p>Once all load balancers are showing up, and all cluster operators are "Available" the <code>openshift-install</code> should complete and advise removing the bootstrap node.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">openshift-install --dir=cluster wait-for bootstrap-complete</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">INFO Waiting up to 20m0s for the Kubernetes API at https://api.cluster.lab.com:6443...
+INFO API v1.19.0+9f84db3 up
+INFO Waiting up to 30m0s for bootstrapping to complete...
+INFO It is now safe to remove the bootstrap resources
+INFO Time elapsed: 0s</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Check all nodes are "Ready":</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>oc get nodes</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">NAME                      STATUS   ROLES           AGE   VERSION
+master1.cluster.lab.com   Ready    master,worker   14h   v1.19.0+9f84db3
+master2.cluster.lab.com   Ready    master,worker   13h   v1.19.0+9f84db3
+master3.cluster.lab.com   Ready    master,worker   13h   v1.19.0+9f84db3</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Check all operators are available:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>oc get co</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">NAME                                       VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
+authentication                             4.6.4     True        False         False      8m34s
+cloud-credential                           4.6.4     True        False         False      15h
+cluster-autoscaler                         4.6.4     True        False         False      13h
+config-operator                            4.6.4     True        False         False      13h
+console                                    4.6.4     True        False         False      7m35s
+csi-snapshot-controller                    4.6.4     True        False         False      13h
+dns                                        4.6.4     True        False         False      13h
+etcd                                       4.6.4     True        False         False      11h
+image-registry                             4.6.4     True        False         False      11h
+ingress                                    4.6.4     True        False         False      8m40s
+insights                                   4.6.4     True        False         False      13h
+kube-apiserver                             4.6.4     True        False         False      11h
+kube-controller-manager                    4.6.4     True        False         False      13h
+kube-scheduler                             4.6.4     True        False         False      13h
+kube-storage-version-migrator              4.6.4     True        False         False      13h
+machine-api                                4.6.4     True        False         False      13h
+machine-approver                           4.6.4     True        False         False      13h
+machine-config                             4.6.4     True        False         False      13h
+marketplace                                4.6.4     True        False         False      8m23s
+monitoring                                 4.6.4     True        False         False      8m18s
+network                                    4.6.4     True        False         False      13h
+node-tuning                                4.6.4     True        False         False      13h
+openshift-apiserver                        4.6.4     True        False         False      8m55s
+openshift-controller-manager               4.6.4     True        False         False      13h
+openshift-samples                          4.6.4     True        False         False      8m21s
+operator-lifecycle-manager                 4.6.4     True        False         False      13h
+operator-lifecycle-manager-catalog         4.6.4     True        False         False      13h
+operator-lifecycle-manager-packageserver   4.6.4     True        False         False      8m57s
+service-ca                                 4.6.4     True        False         False      13h
+storage                                    4.6.4     True        False         False      13h</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Power off the bootstrap node (and destroy it) and comment out the node in both the <code>api</code> and <code>api-int</code> load balancers in <code>/etc/haproxy/haproxy.cfg</code>.</p>
+</div>
+<div class="paragraph">
+<p>The load balancers should look like the following screenshots, note that the ingress LB only has two replicas, therefore will show down on one of the nodes.</p>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/api-lb.png" alt="API LB">
+</div>
+</div>
+<div class="imageblock">
+<div class="content">
+<img src="images/ingress-lb.png" alt="Ingress LB">
+</div>
+</div>
 </div>
 <div class="sect3">
-<h4 id="_worker">Worker</h4>
+<h4 id="_login">Login</h4>
+<div class="paragraph">
+<p>During installation and from your client you can access the cluster using the <code>system:admin</code> account:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>export KUBECONFIG=cluster/auth/kubeconfig</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>oc whoami
+system:admin</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Login is as <code>kubeadmin</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>cat cluster/auth/kubeadmin-password</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc login -u kubeadmin -p kLsUd-GkkRt-GwPI7-n2cku  https://api.cluster.lab.com:6443</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Login to the OpenShift web console:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>oc project openshift-console
+oc get routes</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For example, in a browser <a href="https://console-openshift-console.apps.cluster.lab.com" class="bare">https://console-openshift-console.apps.cluster.lab.com</a></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_troubleshooting">Troubleshooting</h4>
+<div class="sect4">
+<h5 id="_single_master">Single master</h5>
+<div class="paragraph">
+<p>It is possible to deploy a single node "cluster" if defined in the <code>install-config.yaml</code>, however the installation never completes, with operators pending. Apply the following patch for the installation to complete with a single master configuration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc patch etcd cluster -p='{"spec": {"unsupportedConfigOverrides": {"useUnsupportedUnsafeNonHANonProductionUnstableEtcd": true}}}' --type=merge</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_unknown_authority">Unknown authority</h5>
+<div class="paragraph">
+<p>The following error can sometimes occur when attempting to login to the API via the command line:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>error: x509: certificate signed by unknown authority</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Switch projects:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>oc project openshift-authentication</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>List the pods in the <code>openshift-authentication</code> project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>oc get pods</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Using one of the pod names export the ingress certificate:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc rsh -n openshift-authentication oauth-openshift-568bcc5d8f-84zh2 cat /run/secrets/kubernetes.io/serviceaccount/ca.crt &gt; ingress-ca.crt</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Copy and update your certificate authority certificates on your client host:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>sudo cp ingress-ca.crt /etc/pki/ca-trust/source/anchors/
+sudo update-ca-trust extract</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_missing_console">Missing Console</h5>
+<div class="paragraph">
+<p>If both the <code>openshift-samples</code> and <code>console</code> operators were absent during deployment of a cluster. Powering off all three masters and powering them back on brought all the operators up.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_nodes">NODES</h3>
+<div class="paragraph">
+<p>For a home lab, it might be common to leave the cluster as a minimal three-node cluster.  Resources can be tight; however, in the real world, it is likely to provision dedicated infra nodes and many worker nodes.
+It is then possible to label nodes accordingly and mark specific applications to only run on designated infrastructure.</p>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+Whatever the labelling conventions used, all nodes from this point are "worker" nodes with labels.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect3">
+<h4 id="_infra_nodes">Infra nodes</h4>
+<div class="paragraph">
+<p>To avoid duplication just the key details are included, in this case three infra VMs are provisioned with bridged networking, each with 8GB Memory, 2 cores and 50GB storage. Pay close attention to the IP Addresses and the use of the <code>worker.ign</code> ignition file.</p>
+</div>
+<div class="paragraph">
+<p><strong><code>infra1.cluster.lab.com</code></strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.131/24 ipv4.gateway 192.168.0.1 ipv4.dns 192.168.0.101 connection.autoconnect yes</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>sudo systemctl restart NetworkManager
+nmcli con up 'Wired Connection'</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/worker.ign /dev/sda --insecure-ignition --copy-network</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>ip=192.168.0.131::192.168.0.1:255.255.255.0:infra1.cluster.lab.com:ens3:none nameserver=192.168.0.101</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The node should deploy as seen while doing master nodes but worker nodes get provisioned by the masters. Once a worker node has booted up off its hard drive and arrived at the login prompt, they will be a reboot.</p>
+</div>
+<div class="paragraph">
+<p>Check for certificate signing requests, as a cluster administrator view any pending csr:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>oc get csr</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Refined:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>oc get csr | grep -i pending</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Approve them:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>oc adm certificate approve csr-xyz</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Typically, approving the first pending CSR, will cause a second one to appear shortly afterwards.</p>
+</div>
+<div class="paragraph">
+<p>Once both CRS are approved you&#8217;ll see the node with a status NotReady:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>oc get nodes</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>NAME                      STATUS     ROLES           AGE   VERSION
+infra1.cluster.lab.com    NotReady   worker          25s   v1.19.0+9f84db3
+master1.cluster.lab.com   Ready      master,worker   16h   v1.19.0+9f84db3
+master2.cluster.lab.com   Ready      master,worker   15h   v1.19.0+9f84db3
+master3.cluster.lab.com   Ready      master,worker   14h   v1.19.0+9f84db3</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The deployment of the node is still in progress, eventually the node with change status to "Ready".</p>
+</div>
+<div class="paragraph">
+<p>Example when all three infra nodes are initially added to the cluster:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>NAME                      STATUS     ROLES           AGE   VERSION
+infra1.cluster.lab.com    Ready      worker          68s   v1.19.0+9f84db3
+infra2.cluster.lab.com    Ready      worker          32m   v1.19.0+9f84db3
+infra3.cluster.lab.com    Ready      worker          11m   v1.19.0+9f84db3
+master1.cluster.lab.com   Ready      master,worker   16h   v1.19.0+9f84db3
+master2.cluster.lab.com   Ready      master,worker   15h   v1.19.0+9f84db3
+master3.cluster.lab.com   Ready      master,worker   15h   v1.19.0+9f84db3</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You repeat this for any other infra nodes desired, most commonly at least three to achieve high availability, as depicted in the example above.</p>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+Notice the <code>ROLE</code> for the infra node is currently set to <code>worker</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="sect4">
+<h5 id="_label_infra_nodes">Label infra nodes</h5>
+<div class="paragraph">
+<p>Create the infra machine config pool <code>infra-mcp.yaml</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-yaml" data-lang="yaml">apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfigPool
+metadata:
+  name: infra
+spec:
+  machineConfigSelector:
+    matchExpressions:
+      - {key: machineconfiguration.openshift.io/role, operator: In, values: [worker,infra]}
+  maxUnavailable: 1
+  nodeSelector:
+    matchLabels:
+      node-role.kubernetes.io/infra: ""
+  paused: false</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>oc create -f infra-mcp.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Label infra nodes and remove worker label:</p>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+The adding of infra label forces a reboot of the node, wait for reboot before removing the worker label
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>oc label node infra1.cluster.lab.com node-role.kubernetes.io/infra=
+oc label node infra2.cluster.lab.com node-role.kubernetes.io/infra=
+oc label node infra3.cluster.lab.com node-role.kubernetes.io/infra=</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Each node will be marked as non-schedulable and reboot in turn:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code>watch oc get nodes</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>infra1.cluster.lab.com    Ready,SchedulingDisabled   infra,worker    5m3s   v1.19.0+9f84db3</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once completed, each infra node will be labelled both <code>infra,worker</code>, remove the <code>worker</code> label from each:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>oc label node infra1.cluster.lab.com node-role.kubernetes.io/worker-
+oc label node infra2.cluster.lab.com node-role.kubernetes.io/worker-
+oc label node infra3.cluster.lab.com node-role.kubernetes.io/worker-</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Node should look like:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>oc get nodes</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>NAME                      STATUS   ROLES           AGE   VERSION
+infra1.cluster.lab.com    Ready    infra           11m   v1.19.0+9f84db3
+infra2.cluster.lab.com    Ready    infra           42m   v1.19.0+9f84db3
+infra3.cluster.lab.com    Ready    infra           21m   v1.19.0+9f84db3
+master1.cluster.lab.com   Ready    master,worker   16h   v1.19.0+9f84db3
+master2.cluster.lab.com   Ready    master,worker   15h   v1.19.0+9f84db3
+master3.cluster.lab.com   Ready    master,worker   15h   v1.19.0+9f84db3</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_worker_nodes">Worker nodes</h4>
+<div class="paragraph">
+<p>Add worker nodes by repeating the same process as adding infra nodes without any labelling. Making sure IP Addresses and host names are correct during the process.</p>
+</div>
+<div class="paragraph">
+<p>A typical deployment might look like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>NAME                      STATUS   ROLES           AGE   VERSION
+infra1.cluster.lab.com    Ready    infra           11m   v1.19.0+9f84db3
+infra2.cluster.lab.com    Ready    infra           42m   v1.19.0+9f84db3
+infra3.cluster.lab.com    Ready    infra           21m   v1.19.0+9f84db3
+master1.cluster.lab.com   Ready    master,worker   16h   v1.19.0+9f84db3
+master2.cluster.lab.com   Ready    master,worker   15h   v1.19.0+9f84db3
+master3.cluster.lab.com   Ready    master,worker   15h   v1.19.0+9f84db3
+worker1.cluster.lab.com   Ready    worker          68s   v1.19.0+9f84db3
+worker2.cluster.lab.com   Ready    worker          32m   v1.19.0+9f84db3
+worker3.cluster.lab.com   Ready    worker          11m   v1.19.0+9f84db3</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_move_ingress_router">Move ingress router</h4>
+<div class="paragraph">
+<p>It&#8217;s common practice to move the ingress router off the master nodes and run three replicas on the infra nodes. With the correctly labelled infranodes in place this is done with the following two patches.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>oc patch -n openshift-ingress-operator ingresscontroller/default --patch '{"spec":{"nodePlacement": {"nodeSelector":{"matchLabels":{"node-role.kubernetes.io/infra": "" }}}}}' --type=merge</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>oc patch -n openshift-ingress-operator ingresscontroller/default --patch '{"spec":{"replicas": 3}}' --type=merge</code></pre>
+</div>
+</div>
+<div class="admonitionblock important">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-important" title="Important"></i>
+</td>
+<td class="content">
+Update the backend ingress load balancer, in this case, HAProxy, to now point at the three infra nodes.
+</td>
+</tr>
+</table>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_disable_master_scheduler">Disable master scheduler</h4>
+<div class="paragraph">
+<p>Disabling the master scheduler removes the "worker" label from master nodes, preventing unwanted applications from running on master nodes, reserving their resources for running the cluster.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>oc edit scheduler</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Set mastersSchedulable to false:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>apiVersion: config.openshift.io/v1
+kind: Scheduler
+metadata:
+  creationTimestamp: null
+  name: cluster
+spec:
+  mastersSchedulable: false
+  policy:
+    name: ""
+status: {}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Validate:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>oc get nodes</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>NAME                      STATUS   ROLES           AGE   VERSION
+infra1.cluster.lab.com    Ready    infra           11m   v1.19.0+9f84db3
+infra2.cluster.lab.com    Ready    infra           42m   v1.19.0+9f84db3
+infra3.cluster.lab.com    Ready    infra           21m   v1.19.0+9f84db3
+master1.cluster.lab.com   Ready    master          16h   v1.19.0+9f84db3
+master2.cluster.lab.com   Ready    master          15h   v1.19.0+9f84db3
+master3.cluster.lab.com   Ready    master          15h   v1.19.0+9f84db3
+worker1.cluster.lab.com   Ready    worker          68s   v1.19.0+9f84db3
+worker2.cluster.lab.com   Ready    worker          32m   v1.19.0+9f84db3
+worker3.cluster.lab.com   Ready    worker          11m   v1.19.0+9f84db3</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_delete_nodes">Delete nodes</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>oc get nodes</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code>oc delete node infra1.cluster.lab.com</code></pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_ntpchrony">NTP/CHRONY</h3>
+<div class="paragraph">
+<p>In a lab environment, <code>chronyd</code> will be already configured on nodes with the default <code>pool 2.rhel.pool.ntp.org iburst</code>. Should the configuration need to be changed, the process involves adding MachineConfig. Machine Configs are found via the Web Console under <strong>Compute &#8594; Machine Config</strong>. Think of Machine Configs as configuration management for the cluster.</p>
+</div>
+<div class="paragraph">
+<p>SSH to a master node and switch to root, for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">ssh -i cluster_id_rsa core@192.168.0.111
+sudo su -</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Get a working minimalistic <code>chrony.conf</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">grep -v -e '^#' -e '^$' /etc/chrony.conf &gt; chrony.conf</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>On a client make a copy of the <code>chrony.conf</code> configuration file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">vi chrony.conf</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">pool 2.rhel.pool.ntp.org iburst
+driftfile /var/lib/chrony/drift
+makestep 1.0 3
+rtcsync
+keyfile /etc/chrony.keys
+leapsectz right/UTC
+logdir /var/log/chrony</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Encoded the file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">base64 chrony.conf &gt; chrony.conf.encoded</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create a MachineConfig for worker nodes, pasting in the chrony.conf.encoded content:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">vi worker-chrony.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: worker
+  name: worker-chrony
+spec:
+  config:
+    ignition:
+      version: 2.2.0
+    storage:
+      files:
+      - contents:
+          source: data:text/plain;charset=utf-8;base64,cG9vbCAyLnJoZWwucG9vbC5udHAub3JnIGlidXJzdApkcmlmdGZpbGUgL3Zhci9saWIvY2hyb255L2RyaWZ0Cm1ha2VzdGVwIDEuMCAzCnJ0Y3N5bmMKa2V5ZmlsZSAvZXRjL2Nocm9ueS5rZXlzCmxlYXBzZWN0eiByaWdodC9VVEMKbG9nZGlyIC92YXIvbG9nL2Nocm9ueQo=
+          verification: {}
+        filesystem: root
+        mode: 0644
+        path: /etc/chrony.conf</code></pre>
+</div>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+Applying the configuration causes nodes to schedule a reboot, expect each worker node to bounce in sequence.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">watch oc get nodes</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc create -f worker-chrony.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And repeat for master:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">vi master-chrony.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfig
+metadata:
+  labels:
+    machineconfiguration.openshift.io/role: master
+  name: master-chrony
+spec:
+  config:
+    ignition:
+      version: 2.2.0
+    storage:
+      files:
+      - contents:
+          source: data:text/plain;charset=utf-8;base64,cG9vbCAyLnJoZWwucG9vbC5udHAub3JnIGlidXJzdApkcmlmdGZpbGUgL3Zhci9saWIvY2hyb255L2RyaWZ0Cm1ha2VzdGVwIDEuMCAzCnJ0Y3N5bmMKa2V5ZmlsZSAvZXRjL2Nocm9ueS5rZXlzCmxlYXBzZWN0eiByaWdodC9VVEMKbG9nZGlyIC92YXIvbG9nL2Nocm9ueQo=
+          verification: {}
+        filesystem: root
+        mode: 0644
+        path: /etc/chrony.conf</code></pre>
+</div>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+Remeber, applying the configuration causes nodes to schedule a reboot, expect each master node to bounce in sequence.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc create -f master-chrony.yaml</code></pre>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_image_registry">IMAGE REGISTRY</h3>
+<div class="paragraph">
+<p>In typical OpenShift deployments, using a cloud provider with credentials, storage classes will be made available for the target infrastructure. In a bare-metal situation, this is not a luxury. It is simple to define NFS for shared storage, which is OK for specific services and tasks but something like logging; performance will take a hit.
+It is possible to add physical block devices to nodes and use the "Local Storage Operator". However, local storage volumes are fixed to nodes, so moving pods that depend on block storage will run into difficulties, not being able to mount storage to different nodes on demand.</p>
+</div>
+<div class="paragraph">
+<p>For the image registry, NFS shared storage is the right choice.</p>
+</div>
+<div class="sect3">
+<h4 id="_nfs_server">NFS server</h4>
+<div class="paragraph">
+<p>Using a RHEL/CentOS 8.2 host on the same network as your OpenShift Cluster install <code>nfs-utils</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">sudo dnf install nfs-utils -y</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">systemctl start nfs-server
+systemctl enable nfs-server
+systemctl status nfs-server</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">sudo mkdir -p /mnt/openshift/registry</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">vi /etc/exports</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Add the following, including the options for <code>rw,no_wdelay,no_root_squash</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">/mnt/openshift/registry         192.168.0.1/24(rw,sync,no_wdelay,no_root_squash,insecure)</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Export the new share with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">exportfs -arv</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And confirm the share is visible:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">exportfs  -s
+showmount -e 127.0.0.1</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If required, open up the firewall ports needed:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">firewall-cmd --permanent --add-service=nfs
+firewall-cmd --permanent --add-service=rpc-bind
+firewall-cmd --permanent --add-service=mountd
+firewall-cmd --reload</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_nfs_storage_class">NFS storage class</h4>
+<div class="paragraph">
+<p>Add a storage class with the no-provisioner option, making it a manual process:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">vi nfs-storage-class.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs
+provisioner: no-provisioner
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+allowVolumeExpansion: true</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc create -f nfs-storage-class.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See storage classes via the web console <strong>Storage &#8594; Storage Classes</strong></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_configuration">Configuration</h4>
+<div class="paragraph">
+<p>You can now add persistent volume(s) (PV) using the <code>nfs</code> storage class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">vi registry-pv.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: registry-pv
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+  - ReadWriteMany
+  nfs:
+    path: /mnt/openshift/registry
+    server: 192.168.0.15
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc create -f registry-pv.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And view the result:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc get pv</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">NAME          CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+registry-pv   50Gi       RWX            Retain           Available           nfs                     3s</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To update the registry storage, you can add a persistent volume claim (PVC) using the new NFS storage class:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">vi registry-pvc.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: image-registry-storage
+  namespace: openshift-image-registry
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: nfs</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc create -f registry-pvc.yaml</code></pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+The default name for the pvc created is <code>image-registry-storage</code> which is a known here.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Switch to the <code>openshift-image-registry</code> project and view the pending PVC:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc project openshift-image-registry
+oc get pvc</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It will be currently pending:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">NAME                     STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+image-registry-storage   Pending                                      nfs            15s</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And edit the image registry configuration:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc edit configs.imageregistry.operator.openshift.io</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Three things need changing under <code>spec:</code> include <code>managementState</code>, <code>replicas</code> and <code>storage</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">...
+  managementState: Managed
+...
+...
+  replica: 3
+...
+...
+  storage:
+    pvc:
+      claim: image-registry-storage</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can check the state/progress of these changes by viewing the pods:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc project openshift-image-registry
+oc get pods</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">NAME                                               READY   STATUS      RESTARTS   AGE
+cluster-image-registry-operator-6c55f65c7d-sst5g   2/2     Running     0          18h
+image-pruner-1605225600-cpm8d                      0/1     Completed   0          10h
+image-registry-659c75894d-28mp4                    1/1     Running     0          18h
+image-registry-659c75894d-5mx25                    1/1     Running     0          18h
+image-registry-659c75894d-zqxcq                    1/1     Running     0          18h
+node-ca-vj6ql                                      1/1     Running     0          3d
+node-ca-wjk57                                      1/1     Running     0          3d
+node-ca-ww946                                      1/1     Running     0          3d</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And see the PVC has been claimed:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc get pvc</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">NAME                     STATUS   VOLUME        CAPACITY   ACCESS MODES   STORAGECLASS
+image-registry-storage   Bound    registry-pv   50Gi       RWX            nfs</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_expose_registry">Expose registry</h4>
+<div class="paragraph">
+<p>Finally, you can expose the OpenShift image registry to enable you to work with it using Docker or Podman to tag and push images, make sure your in the <code>openshift-image-registry</code> project or add <code>-n openshift-image-registry</code> to include namespace with the command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc get routes</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_migrate_registry">Migrate registry</h4>
+<div class="paragraph">
+<p>To move the image registry to run on infra nodes apply the follwoing patch:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc patch configs.imageregistry.operator.openshift.io/cluster -n openshift-image-registry --type=merge --patch '{"spec":{"nodeSelector":{"node-role.kubernetes.io/infra":""}}}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Check where pods are running by adding <code>-o wide</code> to the following command:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc get pods -o wide</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_troubleshooting_2">Troubleshooting</h4>
+<div class="sect4">
+<h5 id="_no_route_to_host">No route to host</h5>
+<div class="paragraph">
+<p>If pods never get past <code>ContainerCreating</code>, use <code>oc describe pod</code> to see details:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc project openshift-image-registry
+oc get pods
+oc describe pod image-registry-5cc87cc5b8-4k6l6</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you see:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">mount.nfs: No route to host</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>It&#8217;s either the PV is is configured incorrectly, pointing to a wrong NFS server or the NFS server/share is being blocked by a firewall or unavailable.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_unexpected_status">Unexpected status</h5>
+<div class="paragraph">
+<p>If you see errors with OpenShift deployments later like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">Registry server Address:
+Registry server User Name: serviceaccount
+Registry server Email: serviceaccount@example.org
+Registry server Password: &lt;&lt;non-empty&gt;&gt;
+error: build error: Failed to push image: error copying la... received unexpected HTTP status: 500 Internal Server Error</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The permissions on the share directory need fixing:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">chmod 775 /mnt/openshift/registry</code></pre>
+</div>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_undo_storage_config">Undo storage config</h5>
+<div class="paragraph">
+<p>If you need to revert back to a known working configuration, you can make it ephemeral by replacing the registry storage with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc edit configs.imageregistry.operator.openshift.io</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">  storage:
+    emptyDir: {}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Delete PVC:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc delete pvc image-registry-storage</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Delete PV:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc delete pv registry-pv</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_local_storage">LOCAL STORAGE</h3>
+<div class="paragraph">
+<p>Using the local storage operator deals with adding real disks, block storage to nodes.</p>
+</div>
+<div class="paragraph">
+<p>Prior to OCP 4.6, a project needed to be created manually:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc new-project local-storage</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To enable local storage on all nodes including masters and infras:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc annotate project local-storage openshift.io/node-selector=''</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Navigate to <strong>Operators → OperatorHub</strong>, type "Local Storage" into the filter box to locate the Local Storage Operator which now creates <code>openshift-local-storage</code> project namespace.</p>
+</div>
+<div class="sect3">
+<h4 id="_local_storage_class">Local storage class</h4>
+<div class="paragraph">
+<p>Like with NFS, next create a new custom storage class for local block storage:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">vi local-storage-class.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: local-sc
+provisioner: no-provisioner
+reclaimPolicy: Retain
+volumeBindingMode: WaitForFirstConsumer
+parameters:
+  diskformat: thin</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc create -f local-storage-class.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>See storage classes via the web console <strong>Storage → Storage Classes</strong></p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_adding_block_storage">Adding block storage</h4>
+<div class="paragraph">
+<p>Adding disks to servers is either physical activity, or a simple case of adding disks to VMs in which ever virtualization in use.</p>
+</div>
+<div class="paragraph">
+<p>Once block storage is added, determine the device paths for the new devices, SSH to each node and use <code>fdisk -l</code> to see devices.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">ssh -i cluster_id_rsa core@192.168.0.111
+sudo fdisk -l</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Commonly, new devices will begin with <code>/dev/sdb</code> (<code>sda</code> used by RHCOS).</p>
+</div>
+<div class="paragraph">
+<p>Its good practice to manage each node because paths might differ depending on the environment.</p>
+</div>
+<div class="paragraph">
+<p>Assuming three infra nodes, each with a new 50GB disk attached, here is infra1:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">vi local-disks-infra1.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">apiVersion: "local.storage.openshift.io/v1"
+kind: "LocalVolume"
+metadata:
+  name: "local-disks-i1"
+  namespace: "openshift-local-storage"
+spec:
+  nodeSelector:
+    nodeSelectorTerms:
+    - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - infra1.cluster.lab.com
+  storageClassDevices:
+    - storageClassName: "local-sc"
+      volumeMode: Filesystem
+      fsType: xfs
+      devicePaths:
+        - /dev/sdb</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc create -f local-disks-infra1.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>In a short time, see the PVs appear:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc get pv</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">NAME                CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM STORAGECLASS   REASON   AGE
+local-pv-297ca047   50Gi       RWO            Retain           Available         local-sc                53s
+local-pv-dc609890   50Gi       RWO            Retain           Available         local-sc                63s
+local-pv-fe609342   50Gi       RWO            Retain           Available         local-sc                70s</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Navigate to <strong>Administration &#8594; Custom Resource Definitions &#8594; LocalVolume &#8594; Instances</strong> to view Local Volumes.</p>
+</div>
+<div class="paragraph">
+<p>Repeat this process for each node in the cluster that needs local block storage made available.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_cluster_logging">CLUSTER LOGGING</h3>
+<div class="paragraph">
+<p>OpenShift comes with its native logging stack using Elasticsearch, Fluentd, and Kibana (EFK). It can be very resource-intensive, in a production environment dedicate resource plentiful "infra" nodes to run Elasticsearch and use decent block storage.</p>
+</div>
+<div class="paragraph">
+<p>Making do with limited resources for home lab environments.</p>
+</div>
+<div class="paragraph">
+<p>Install the "Elastic Search" and "Cluster Logging" operators via the Web Console, See <a href="https://docs.openshift.com/container-platform/4.6/logging/cluster-logging-deploying.html" class="bare">https://docs.openshift.com/container-platform/4.6/logging/cluster-logging-deploying.html</a></p>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+Make sure you select operators provided by Red Hat, Inc and not proprietary or community versions.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Check the current state of the cluster-logging project:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc project openshift-logging</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc get pods</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">NAME                                       READY   STATUS    RESTARTS   AGE
+cluster-logging-operator-f58c98989-2jrxx   1/1     Running   0          28m</code></pre>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_ephemeral_logging">Ephemeral logging</h4>
+<div class="paragraph">
+<p>To run logging with ephemeral storage, meaning all of a pod’s data is lost upon restart because no real storage is provided, perfect for a lab.</p>
+</div>
+<div class="paragraph">
+<p>Via the web console, <strong>Administration → Custom Resource Definitions → ClusterLogging → Instances → Create ClusterLogging</strong>.</p>
+</div>
+<div class="paragraph">
+<p>Make note of the <code>resources: limits:</code>, The following example has reduced memory defined and <code>emptyDir: {}</code> for storage, <code>nodeSelector</code> can be omitted if no infra nodes are defined.</p>
+</div>
+<div class="paragraph">
+<p>Paste in the following logging instance:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">apiVersion: "logging.openshift.io/v1"
+kind: "ClusterLogging"
+metadata:
+  name: "instance"
+  namespace: "openshift-logging"
+spec:
+  managementState: "Managed"
+  logStore:
+    type: "elasticsearch"
+    retentionPolicy:
+      application:
+        maxAge: 1d
+      infra:
+        maxAge: 7d
+      audit:
+        maxAge: 7d
+    elasticsearch:
+      nodeCount: 3
+      nodeSelector:
+        node-role.kubernetes.io/infra: ''
+      storage:
+        emptyDir: {}
+      redundancyPolicy: "SingleRedundancy"
+      resources:
+        limits:
+          memory: 3Gi
+        requests:
+          memory: 3Gi
+  visualization:
+    type: "kibana"
+    kibana:
+      replicas: 1
+  curation:
+    type: "curator"
+    curator:
+      schedule: "30 3 * * *"
+  collection:
+    logs:
+      type: "fluentd"
+      fluentd: {}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A working deployment should look something like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc project openshift-logging
+oc get pods</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">NAME                                            READY   STATUS    RESTARTS   AGE
+cluster-logging-operator-f58c98989-2jrxx        1/1     Running   0          53m
+elasticsearch-cdm-2p9fwrm5-1-8fff599cb-j7xh2    2/2     Running   0          3m4s
+elasticsearch-cdm-2p9fwrm5-2-944758ff6-zrv9p    2/2     Running   0          3m1s
+elasticsearch-cdm-2p9fwrm5-3-68bfc4b584-vbdqp   2/2     Running   0          2m58s
+fluentd-bzmw4                                   1/1     Running   0          3m11s
+fluentd-msv2p                                   1/1     Running   0          3m11s
+fluentd-sglqw                                   1/1     Running   0          3m12s
+kibana-86f69c8b84-62b7r                         2/2     Running   0          3m7s</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Fluentd runs an instance on every node in the cluster.</p>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_local_storage_logging">Local storage logging</h4>
+<div class="paragraph">
+<p>Assuming the PVs are available with a storage class of <code>local-sc</code> as described in the #_local_storage_operator section of this document. The following logging instance includes the storage class definition. Both the <code>storageClassName</code> and <code>size</code> are added:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">apiVersion: "logging.openshift.io/v1"
+kind: "ClusterLogging"
+metadata:
+  name: "instance"
+  namespace: "openshift-logging"
+spec:
+  managementState: "Managed"
+  logStore:
+    type: "elasticsearch"
+    retentionPolicy:
+      application:
+        maxAge: 1d
+      infra:
+        maxAge: 7d
+      audit:
+        maxAge: 7d
+    elasticsearch:
+      nodeCount: 3
+      nodeSelector:
+        node-role.kubernetes.io/infra: ''
+      storage:
+        storageClassName: local-sc
+        size: 50G
+      redundancyPolicy: "SingleRedundancy"
+      resources:
+        limits:
+          memory: 3Gi
+        requests:
+          memory: 3Gi
+  visualization:
+    type: "kibana"
+    kibana:
+      replicas: 1
+  curation:
+    type: "curator"
+    curator:
+      schedule: "30 3 * * *"
+  collection:
+    logs:
+      type: "fluentd"
+      fluentd: {}</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc project openshift-logging
+oc get pods</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If successful, the PVC should be claimed and bound:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc get pvc</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">NAME                                         STATUS   VOLUME              CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+elasticsearch-elasticsearch-cdm-lk4f9958-1   Bound    local-pv-d4d267e6   50Gi       RWO            local-sc       22s
+elasticsearch-elasticsearch-cdm-lk4f9958-2   Bound    local-pv-297ca047   50Gi       RWO            local-sc       22s
+elasticsearch-elasticsearch-cdm-lk4f9958-3   Bound    local-pv-6317e505   50Gi       RWO            local-sc       22s</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_troubleshooting_3">Troubleshooting</h4>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc project openshift-logging
+oc get pods</code></pre>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_insufficient_memory">Insufficient memory</h5>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc describe pod elasticsearch-cdm-uz12dkcd-1-6cf9ff6cb9-945gg</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">Events:
+  Type     Reason            Age   From               Message
+  ----     ------            ----  ----               -------
+  Warning  FailedScheduling  33m   default-scheduler  0/6 nodes are available: 3 Insufficient memory, 3 node(s) didn't match node selector.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Resource limits set for elasticsearch must be available on the nodes, either increase memory on the hosts or decrease the memory in the settings.</p>
+</div>
+</div>
+<div class="sect4">
+<h5 id="_delete_cluster_logging">Delete cluster logging</h5>
+<div class="paragraph">
+<p><strong>Administration → Custom Resource Definitions → ClusterLogging → Instances → Create ClusterLogging</strong></p>
+</div>
+<div class="paragraph">
+<p>Delete the cluster logging instance.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_certificates">CERTIFICATES</h3>
+<div class="paragraph">
+<p>Replicate a local Certificate Authority (CA) for generating SSL certificates and applying them to OpenShift. The first step is to generate a root certificate and a private key. Then add the root certificate to any host, and then certificates generated and signed will be inherently trusted.</p>
+</div>
+<div class="sect3">
+<h4 id="_local_ca">Local CA</h4>
+<div class="paragraph">
+<p>On a local Linux client, Generate a private key, you&#8217;ll be prompted for a pass phrase:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">openssl genrsa -des3 -out local_ca.key 2048</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">Generating RSA private key, 2048 bit long modulus (2 primes)
+.............+++++
+.......................................................................................................................+++++
+e is 65537 (0x010001)
+Enter pass phrase for local_ca.key: changeme
+Verifying - Enter pass phrase for local_ca.key: changeme</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Which generated a private key file <code>local_ca.key</code>.</p>
+</div>
+<div class="paragraph">
+<p>Generate a root certificate:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">openssl req -x509 -new -nodes -key local_ca.key -sha256 -days 1825 -out local_ca.pem</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Enter the password you just set and I used the following bogus details:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">Country Name (2 letter code) [XX]:UK
+State or Province Name (full name) []:CA County
+Locality Name (eg, city) [Default City]:CA City
+Organization Name (eg, company) [Default Company Ltd]:Local Certificate Authority
+Organizational Unit Name (eg, section) []:CA Unit
+Common Name (eg, your name or your server's hostname) []:ca.local
+Email Address []:noreply@ca.local</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>View root certificate:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">openssl x509 -in local_ca.pem --text</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_install_root_certificate">Install root certificate</h4>
+<div class="paragraph">
+<p>On a local Linux RHEL 8/CentOS 8 client:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">sudo cp local_ca.pem /etc/pki/ca-trust/source/anchors/</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">update-ca-trust extract</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_signed_certificate">Signed certificate</h4>
+<div class="paragraph">
+<p>Create a private key:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">openssl genrsa -out cluster.lab.com.key 2048</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create a CSR, with a Common Name (CN) in this case <code>c`luster.lab.com</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">openssl req -new -key cluster.lab.com.key -out cluster.lab.com.csr</code></pre>
+</div>
+</div>
+<div class="admonitionblock note">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-note" title="Note"></i>
+</td>
+<td class="content">
+This example relies on the <code>alt_names</code>, you might wish to create two certificates with the Common Names <code>*.apps.cluster.lab.com</code> and <code>api.cluster.lab.com</code>.
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">Country Name (2 letter code) [XX]:UK
+State or Province Name (full name) []:OCP County
+Locality Name (eg, city) [Default City]:OCP City
+Organization Name (eg, company) [Default Company Ltd]:OpenShift Container Platform
+Organizational Unit Name (eg, section) []:OCP Unit
+Common Name (eg, your name or your server's hostname) []:cluster.lab.com
+Email Address []:noreply@cluster.lab.com
 
+Please enter the following 'extra' attributes
+to be sent with your certificate request
+A challenge password []:
+An optional company name []:</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create a configuration file needed to define the Subject Alternative Name (SAN) extension, this allows multiple, alternative DNS validations. For OpenShift there are two required, one for the ingress traffic for users to access application deployed. The second is for the API. This method means the one certificate can be used for both cases.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">vi cluster.lab.com.ext</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">authorityKeyIdentifier=keyid,issuer
+basicConstraints=CA:FALSE
+keyUsage = digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment
+subjectAltName = @alt_names
+
+[alt_names]
+DNS.1 = *.apps.cluster.lab.com
+DNS.2 = api.cluster.lab.com</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create the certificate, you&#8217;ll be prompted for the root certificate password again:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">openssl x509 -req -in cluster.lab.com.csr -CA local_ca.pem -CAkey local_ca.key -CAcreateserial -out cluster.lab.com.crt -days 825 -sha256 -extfile cluster.lab.com.ext</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should have all these files:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">cluster.lab.com.crt
+cluster.lab.com.csr
+cluster.lab.com.ext
+cluster.lab.com.key
+local_ca.key
+local_ca.pem
+local_ca.srl</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>An addition recommended, yet optional step is the add the root certificate at the end of the new client certificate file:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">cat local_ca.pem &gt;&gt; cluster.lab.com.crt</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>View the final certificate:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">openssl x509 -in cluster.lab.com.crt -text</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Verify the certificate:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">openssl verify -CAfile local_ca.pem cluster.lab.com.crt</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">cluster.lab.com.crt: OK</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_ingress_certificate">Ingress certificate</h4>
+<div class="paragraph">
+<p>Create a secret in the <strong><code>openshift-ingress</code></strong> name-space containing both the certificate and private key:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc create secret tls apps-cert --cert=cluster.lab.com.crt --key=cluster.lab.com.key -n openshift-ingress</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And apply the patch, make sure the name matches the name of the secret just added, in this case <code>apps-cert</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc patch ingresscontroller.operator default --type=merge -p '{"spec":{"defaultCertificate": {"name": "apps-cert"}}}' -n openshift-ingress-operator</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To view the changes taking place:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc project openshift-ingress</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should see the two route pods rebuild:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc get pods</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">NAME                             READY   STATUS    RESTARTS   AGE
+router-default-8d9fbbfb7-55xpt   1/1     Running   0          102s
+router-default-8d9fbbfb7-w6zhn   1/1     Running   0          118s</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_api_certificate">API certificate</h4>
+<div class="paragraph">
+<p>Create a secret in the <strong><code>openshift-config</code></strong> name-space containing both the certificate and private key:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc create secret tls api-cert --cert=cluster.lab.com.crt --key=cluster.lab.com.key -n openshift-config</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Again, apply the patch, making sure the name matches the name of the secret just added, in this case <code>api-cert</code>, and the domain matches you API URL in this case <code>api.cluster.lab.com</code>:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc patch apiserver cluster --type=merge -p '{"spec":{"servingCerts": {"namedCertificates":[{"names": ["api.cluster.lab.com"], "servingCertificate": {"name": "api-cert"}}]}}}'</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To see the effect of the previous patch:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc get apiserver cluster -o yaml</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">spec:
+  servingCerts:
+    namedCertificates:
+    - names:
+      - api.cluster.lab.com
+      servingCertificate:
+        name: api-cert</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>To view the changes taking place:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc project openshift-kube-apiserver
+oc get pods</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You should see three <code>kube-apiserver</code> pods redeploy (this took a while for me):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">kube-apiserver-master1.cluster.lab.com       4/4     Running     0          3m58s
+kube-apiserver-master2.cluster.lab.com       4/4     Running     0          10m
+kube-apiserver-master3.cluster.lab.com       4/4     Running     0          7m11s</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once all three pods have complete redeployment, check and validate the certificate has been applied:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">openssl s_client -connect api.cluster.lab.com:6443</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>And/or:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">curl -vvI https://api.cluster.lab.com:6443</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Sometimes the trusted certs on a client doesn&#8217;t take full effect, you can provide the CA certificate explicitly:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">curl --cacert local_ca.pem -vvI https://api.cluster.lab.com:6443</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Test logging in:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc login -u admin -p changme https://api.cluster.lab.com:6443</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Another trick is to specify your certificate-authority certificate:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc login --certificate-authority=ca.crt https://api.cluster.lab.com:6443</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_replace_certificates">Replace certificates</h4>
+<div class="paragraph">
+<p>To replace certificates the following commands can be used:</p>
+</div>
+<div class="paragraph">
+<p>Example for ingress (*.apps):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc create secret tls apps-cert --cert=api.cluster.lab.com.crt --key=api.cluster.lab.com.key -n openshift-ingress --dry-run=client -o yaml| oc replace -f -</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Example for api:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc create secret tls api-cert --cert=api.cluster.lab.com.crt --key=api.cluster.lab.com.key -n openshift-config --dry-run=client -o yaml| oc replace -f -</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_add_ca_bundle">Add CA Bundle</h4>
+<div class="paragraph">
+<p>Using your CA certificate:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">vi user-ca-bundle.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">apiVersion: v1
+data:
+  ca-bundle.crt: |
+    -----BEGIN CERTIFICATE-----
+    MIIEKTCCAxGgAwIBAgIUTO5Cn1LKQtoaWrfcOnHSdRBmpvwwDQYJKoZIhvcNAQEL
+    BQAwgaMxCzAJBgNVBAYTAlVLMRMwEQYDVQQIDApPQ1AgQ291bnR5MREwDwYDVQQH
+    DAhPQ1AgQ2l0eTElMCMGA1UECgwcT3BlblNoaWZ0IENvbnRhaW5lciBQbGF0Zm9y
+    bTERMA8GA1UECwwIT0NQIFVuaXQxETAPBgNVBAMMCGNhLmxvY2FsMR8wHQYJKoZI
+    hvcNAQkBFhBub3JlcGx5QGNhLmxvY2FsMB4XDTIwMTExMjE1NDYxNVoXDTI1MTEx
+    MTE1NDYxNVowgaMxCzAJBgNVBAYTAlVLMRMwEQYDVQQIDApPQ1AgQ291bnR5MREw
+    DwYDVQQHDAhPQ1AgQ2l0eTElMCMGA1UECgwcT3BlblNoaWZ0IENvbnRhaW5lciBQ
+    bGF0Zm9ybTERMA8GA1UECwwIT0NQIFVuaXQxETAPBgNVBAMMCGNhLmxvY2FsMR8w
+    HQYJKoZIhvcNAQkBFhBub3JlcGx5QGNhLmxvY2FsMIIBIjANBgkqhkiG9w0BAQEF
+    AAOCAQ8AMIIBCgKCAQEAuSidKVFVoKFv3QBHTTgjfhPyvsL4O8H530ehb7iap71b
+    Bw2bzxSnrB84Vh4EeZ+pF4cAfK8jquvq2kJjPOGzuflc0aAVWzq6DYJLGRP5T6Sw
+    v8Zzlnf0EwSBQRxKs3MNlfM36uRkJMsTxxlKYsBsMP51bT9PNYzPqQ6WcDZyclf+
+    OGhnb2uUDud9oGLVapeHfibiyfSahgnnds3UyjWtYUP3sgWDPCKOpXIqFGcCqdfs
+    rgRndEq6Leu3/yxnxNwQmB5v3+XAUybUSU8U+cJDYrsyxu5wtYDI75Eo6ocIbVxx
+    T+waMwQPLhzMv8YfhNn91l4S0lHR5GL1c7RY3ms+xQIDAQABo1MwUTAdBgNVHQ4E
+    FgQURK6H+pSQSQqce0NyZiEbVjbCdukwHwYDVR0jBBgwFoAURK6H+pSQSQqce0Ny
+    ZiEbVjbCdukwDwYDVR0TAQH/BAUwAwEB/zANBgkqhkiG9w0BAQsFAAOCAQEAhMRz
+    F+e6pV7eQXyyiExIMoTI3hqubsRTANmNbXkNBrCRswUoe7T1F3146G9B2wAFQAtH
+    vda4NcS+i1yW4QG0cgnfJRcPsRnTSEmezia4aHn7vUW3oA8HGL47zc+tlQPV6EKd
+    hjtdH8R2GIB5CeBhEp1I9DuX2owWEemAnrZxfGjQJxTvCEOprkCJBzozNumwMhZZ
+    gmzBUeKYbQHVH0oGATGqKph8X36NGPtUdIDY80INThMS0XvvH7fndX1HOEuB37mn
+    UW7CPsnoMWXf8SsPon4g6aMuKsDpKUqsuvT3RNFHofZIBnqXdCYzbdYbzrZ5ppBH
+    sx3KXS6+lZijVVMwoA==
+    -----END CERTIFICATE-----
+kind: ConfigMap
+metadata:
+  name: user-ca-bundle
+  namespace: openshift-config</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc create -f user-ca-bundle.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Now edit the cluster proxy configuration (even though a proxy might not be in use):</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc edit proxy/cluster</code></pre>
+</div>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+This causes a scheduled reboot of all your nodes.
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>Replace the <code>spec:</code> with:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">spec:
+  trustedCA:
+    name: user-ca-bundle</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This change is a Machine Config and adds the bundle to each nodes <code>ca-trust</code>:</p>
+</div>
+<div class="paragraph">
+<p>SSH to a node, for example:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">ssh -i cluster_id_rsa core@192.168.0.111
+sudo su -</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The following file gets updated with your certificates:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">/etc/pki/ca-trust/source/anchors/openshift-config-user-ca-bundle.crt</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">openssl x509 -in openshift-config-user-ca-bundle.crt --text</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Once all the nodes reboot your ca-bundle is included.</p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_identity_providers">IDENTITY PROVIDERS</h3>
+<div class="paragraph">
+<p>It is essential to break down OpenShift components and concepts into digestible chunks and avoid the risk of being overwhelmed with complexity.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>An Identity provider deals with the <strong>authentication</strong> layer and is responsible for identifying a user.</p>
+</li>
+<li>
+<p>The <strong>authorisation</strong> layer determines if requests are honoured, Role-based access control (RBAC) policy determines what a user is authorised to do.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>The combination of groups and roles deals with <strong>authorisation</strong>.</p>
+</div>
+<div class="sect3">
+<h4 id="_htpasswd">HTPasswd</h4>
+<div class="paragraph">
+<p>On a Linux client install the tools:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">dnf install httpd-tools -y</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create an HTPasswd file containing users:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">htpasswd -c -B -b users.htpasswd admin changeme
+htpasswd -b users.htpasswd tom changeme
+htpasswd -b users.htpasswd dick changeme
+htpasswd -b users.htpasswd harry changeme</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Which should look something like this:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">cat users.htpasswd</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">admin:$2y$05$GTvOfcm2An9XdAIyDtwzGOvjGrroac78.NHrDdySO0KOBKAPaYGgi
+tom:$apr1$kouuYCYa$wlB2AB4.Ykxn/4QgHUtD9.
+dick:$apr1$IETeTG0v$g0P0gqR6aQJTCaGS15QWa0
+harry:$apr1$qhyrJZzc$HBCYSf9OFHRpM6he0LJ9k.</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>The following command runs locally and generates the needed yaml file for OpenShift:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc create secret generic htpasswd-secret --from-file=htpasswd=users.htpasswd -n openshift-config -o yaml --dry-run=client &gt; htpasswd-secret.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Which can then be used to create or replace the secret:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc create -f htpasswd-secret.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc replace -f htpasswd-secret.yaml</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>For reference, is you wish to extract an existing htpasswd file out of OpenShift use the following:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc get secret htpasswd-secret -ojsonpath={.data.htpasswd} -n openshift-config | base64 -d &gt; test.htpasswd</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Next, either via the web console, <strong>Administration &#8594; Cluster Settings &#8594; Global Configuration &#8594; OAuth &#8594; YAML</strong></p>
+</div>
+<div class="paragraph">
+<p>Or via the command line:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">vi oauth.yaml</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">apiVersion: config.openshift.io/v1
+kind: OAuth
+metadata:
+  name: cluster
+spec:
+  identityProviders:
+  - name: htpasswd_provider
+    mappingMethod: claim
+    type: HTPasswd
+    htpasswd:
+      fileData:
+        name: htpasswd-secret</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc replace -f oauth.yaml</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_cluster_admin">Cluster admin</h4>
+<div class="paragraph">
+<p>Using RBAC to add the role <code>cluster-admin</code> to the new admin account:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc adm policy add-cluster-role-to-user cluster-admin admin</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If the account has not being used to log into the cluster a warning will display:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">Warning: User 'admin' not found
+clusterrole.rbac.authorization.k8s.io/cluster-admin added: "admin"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Log into OpenShift for each user first to "create the user" in OpenShift and avoid the warning.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc adm policy add-cluster-role-to-user edit tom</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">clusterrole.rbac.authorization.k8s.io/edit added: "tom"</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>You can also add users limited to projects:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc adm policy add-role-to-user edit harry -n logging-sensitive-data</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_remove_kubeadmin">Remove kubeadmin</h4>
+<div class="paragraph">
+<p>OpenShift clusters are deployed with an install generated <code>kubeadmin</code> account. Once identity providers are fully configured it is recommend security best practice to remove this default account.</p>
+</div>
+<div class="paragraph">
+<p>The <code>kubeadmin</code> password is stored in <code>cluster/auth/kubeadmin-password</code>.</p>
+</div>
+<div class="paragraph">
+<p>Ensuring you have added at least one other user with <code>cluster-admin</code> role, the <code>kubeadmin</code> account can be removed using:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">oc delete secrets kubeadmin -n kube-system</code></pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_ldap">LDAP</h4>
+<div class="sect4">
+<h5 id="_deploy_ldap">Deploy LDAP</h5>
+<div class="paragraph">
+<p>This process covers deploying an application using container images. In this case deploying a basic LDAP service for testing identity providers. Such a service would always be external to the cluster. Using this image by Rafael Römhild here <a href="https://github.com/rroemhild/docker-test-openldap" class="bare">https://github.com/rroemhild/docker-test-openldap</a></p>
+</div>
+<div class="paragraph">
+<p>On another host on the same subnet as the cluster and load balancer, pull the image:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">podman pull docker.io/rroemhild/test-openldap</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Create a pod:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">podman pod create -p 389 -p 636 -n ldappod</code></pre>
+</div>
+</div>
+<div class="admonitionblock caution">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-caution" title="Caution"></i>
+</td>
+<td class="content">
+If you see an error error from <code>slirp4netns while setting up port redirection: map[desc:bad request: add_hostfwd: slirp_add_hostfwd failed]</code> you need to add the following kernel parameter
+</td>
+</tr>
+</table>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">vi /etc/sysctl.conf</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">net.ipv4.ip_unprivileged_port_start = 0</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">sudo sysctl -p</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Launch the container:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">podman run --privileged -d --pod ldapod rroemhild/test-openldap</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Open the firewall ports for LDAP for accessing it directly from external hosts:</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight nowrap"><code class="language-bash" data-lang="bash">firewall-cmd --permanent --add-port=389/tcp
+firewall-cmd --permanent --add-port=636/tcp
+firewall-cmd --reload</code></pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_summary">SUMMARY</h3>
+<div class="paragraph">
+<p>This document is likely to be updated and evolve. I hope the information and examples serve you well.</p>
 </div>
 </div>
 </div>
@@ -1765,7 +4150,7 @@ nameserver=192.168.0.101</code></pre>
 <div id="footer">
 <div id="footer-text">
 Version 1.0<br>
-Last updated 2020-11-23 17:39:27 UTC
+Last updated 2020-11-24 14:58:59 UTC
 </div>
 </div>
 <script type="text/x-mathjax-config">

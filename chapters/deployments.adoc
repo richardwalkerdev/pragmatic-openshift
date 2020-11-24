@@ -1,0 +1,105 @@
+[source%nowrap,bash]
+----
+podman pull docker.io/rroemhild/test-openldap
+----
+
+Create a pod:
+
+[source%nowrap,bash]
+----
+podman pod create -p 389 -p 636 -n ldappod
+----
+
+
+
+View the local image:
+
+[source%nowrap,bash]
+----
+podman images
+----
+
+Make sure you logged into OpenShift API as user:
+
+[source%nowrap,bash]
+----
+oc login -u admin -p changeme https://api.cluster.lab.com:6443
+----
+
+Log into the OpenShift registry using Podamn (assuming the route has been exposed):
+
+[source%nowrap,bash]
+----
+podman login -u $(oc whoami) -p $(oc whoami -t) --tls-verify=false default-route-openshift-image-registry.apps.cluster.lab.com
+----
+
+Create a new project:
+
+[source%nowrap,bash]
+----
+oc new-project my-ldap-project
+---- 
+
+Create a new:
+
+[source%nowrap,bash]
+----
+oc create is my-ldap-app
+----
+
+View the paths ready for copying:
+
+[source%nowrap,bash]
+----
+podman images
+oc get is
+----
+
+Tag the image using the following structure:
+
+[source%nowrap,bash]
+----
+podman tag <LOCAL_IMAGE_NAME> <REGISTRY_URL>/<PROJECT_NAME>/<IMAGE_STREAM>:<VERSION> 
+----
+
+For example:
+
+[source%nowrap,bash]
+----
+podman tag docker.io/rroemhild/test-openldap:latest default-route-openshift-image-registry.apps.cluster.lab.com/my-ldap-project/my-ldap-app:latest
+----
+
+Push the image:
+
+[source%nowrap,bash]
+----
+podman push default-route-openshift-image-registry.apps.cluster.lab.com/my-ldap-project/my-ldap-app:latest --tls-verify=false
+----
+
+Create a new app using the image:
+
+[source%nowrap,bash]
+----
+oc new-app --as-deployment-config my-ldap-app:latest
+----
+
+Expose the service:
+
+[source%nowrap,bash]
+----
+oc expose service/my-ldap-app
+----
+
+===== Testing LDAP
+
+On a Linux client:
+
+[source%nowrap,bash]
+----
+sudo dnf install openldap-clients -y
+----
+
+
+ldapsearch -h my-ldap-is-my-ldap-project.apps.cluster.lab.com -p 389 -D cn=admin,dc=planetexpress,dc=com -w GoodNewsEveryone -b "dc=planetexpress,dc=com" -s sub "(objectclass=*)"
+
+// This is a comment and won't be rendered.

@@ -1,8 +1,8 @@
-=== Installation
+=== INSTALLATION
 
 At the time of writing the latest version is 4.6.4. The downloads necessary are publicly available however download a legitimate pull secret from the Red Hat cluster portal. Vising https://cloud.redhat.com/openshift/install/metal/user-provisioned for the latest versions and obtaining your pull secret. 
 
-==== Client Tools
+==== Client tools
 
 Download the OpenShift installer program on your client computer:
 
@@ -71,6 +71,8 @@ openshift-install version
 ----
 openshift-install 4.6.4
 ----
+
+==== Install preparation
 
 Create a working directory, for example:
 
@@ -373,14 +375,14 @@ Disk /dev/sda: 58.5 GiB, 62763565056 bytes, 122585088 sectors
 
 Write the image to the device:
 
-[source]
+[source%nowrap]
 ----
 sudo dd if=rhcos-installer.x86_64.iso of=/dev/sda status=progress; sync
 ----
 
 The next steps repeat the process of booting the three physical nodes using the Red Hat CoreOS ISO. Make sure to use `master.ign`, and the right IP Address and hostname for each master node. In the case of an Intel NUC, `F10` is used to interrupt the host BIOS and select a boot device. 
 
-*`master1.cluster.lab.com`*
+===== master1.cluster.lab.com
 
 Using the `rhcos-installer.x86_64.iso` USB device, boot the VM up, until you arrive at a command prompt:
 
@@ -405,9 +407,7 @@ View the connection:
 nmcli con show
 ----
 
-Connection
-
-Set the IPAddress for the bootstrap node:
+Set the IP Address for the bootstrap node:
 
 [source%nowrap,bash]
 ----
@@ -424,34 +424,27 @@ nmcli con up 'Wired Connection'
 
 Start the CoreOS installer, providing the `master.ign` ignition file:
 
-[source]
+[source%nowrap]
 ----
 sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition --copy-network 
 ----
 
-Reboot the VM with `reboot`, make sure the VM boots from the hard disk storage (eject the ISO before it boots) or `shutdown` the VM and remove the CD-ROM from the boot order.
+Reboot the VM with `reboot`, make sure the VM boots from the hard disk storage (remove the USB/ISO before it boots) or `shutdown` the VM and remove the CD-ROM from the boot order and power it back on.
 
 Hit `tab` at the RHCOS GRUB menu and add the following:
 
-
-[source%nowrap,bash]
+[source%nowrap]
 ----
-ip=192.168.0.111::192.168.0.1:255.255.255.0:master1.cluster.lab.com:ens3:none
-nameserver=192.168.0.101
+ip=192.168.0.111::192.168.0.1:255.255.255.0:master1.cluster.lab.com:ens3:none nameserver=192.168.0.101
 ----
 
+Unable to provide a screenshot of a physical host GRUB configuration, here is the example when repeating this process for an infra node:
 
+image::images/infra-grub.png[GRUB]
 
+CAUTION: It's unclear why this step is needed but with nodes other than the `bootstrap` node, this intervention was required. There are better methods for provisioning nodes but this documentation is focused on the most fundamental approach.
 
-
-
-
-
-
-
-
-
-
+Prior to OCP 4.6, all the CoreOS parameters where added at the GRUB stage, for reference here are the original parameters:
 
 [source%nowrap,bash]
 ----
@@ -463,7 +456,32 @@ ip=192.168.0.111::192.168.0.1:255.255.255.0:master1.cluster.lab.com:eno1:none:19
 nameserver=192.168.0.101
 ----
 
-*`master2.cluster.lab.com`*
+===== master2.cluster.lab.com
+
+Repeat the process for the second master node:
+
+[source%nowrap,bash]
+----
+nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.112/24 ipv4.gateway 192.168.0.1 ipv4.dns 192.168.0.101 connection.autoconnect yes
+----
+
+[source]
+----
+sudo systemctl restart NetworkManager
+nmcli con up 'Wired Connection'
+----
+
+[source%nowrap]
+----
+sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition
+----
+
+[source%nowrap]
+----
+ip=192.168.0.112::192.168.0.1:255.255.255.0:master2.cluster.lab.com:ens3:none nameserver=192.168.0.101
+----
+
+Original bootstrap parameters:
 
 [source%nowrap,bash]
 ----
@@ -475,7 +493,32 @@ ip=192.168.0.112::192.168.0.1:255.255.255.0:master2.cluster.lab.com:eno1:none:19
 nameserver=192.168.0.101
 ----
 
-*`master3.cluster.lab.com`*
+===== master3.cluster.lab.com
+
+Repeat the process for the third master node:
+
+[source%nowrap,bash]
+----
+nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.113/24 ipv4.gateway 192.168.0.1 ipv4.dns 192.168.0.101 connection.autoconnect yes
+----
+
+[source]
+----
+sudo systemctl restart NetworkManager
+nmcli con up 'Wired Connection'
+----
+
+[source%nowrap]
+----
+sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition
+----
+
+[source%nowrap]
+----
+ip=192.168.0.113::192.168.0.1:255.255.255.0:master3.cluster.lab.com:ens3:none nameserver=192.168.0.101
+----
+
+Original bootstrap parameters:
 
 [source%nowrap,bash]
 ----
@@ -486,5 +529,183 @@ coreos.inst.ignition_url=http://192.168.0.101:8080/master.ign
 ip=192.168.0.113::192.168.0.1:255.255.255.0:master3.cluster.lab.com:eno1:none:192.168.0.101
 nameserver=192.168.0.101
 ----
+
+==== Completion
+
+Once all three master nodes are provisioning the process can take some time to complete. As indicated by the installer INFO "Waiting up to 40m0s for bootstrapping to complete". 
+
+The two key things to watch are the load balancers and cluster operators. Once the master node boots up to the login prompt, it will download a bunch of images and do some initial installation, and the host will perform a reboot and come back to the login prompt during this process.
+
+Once all load balancers are showing up, and all cluster operators are "Available" the `openshift-install` should complete and advise removing the bootstrap node. 
+
+[source%nowrap,bash]
+----
+openshift-install --dir=cluster wait-for bootstrap-complete
+----
+
+[source%nowrap,bash]
+----
+INFO Waiting up to 20m0s for the Kubernetes API at https://api.cluster.lab.com:6443... 
+INFO API v1.19.0+9f84db3 up                       
+INFO Waiting up to 30m0s for bootstrapping to complete... 
+INFO It is now safe to remove the bootstrap resources 
+INFO Time elapsed: 0s                             
+----
+
+Check all nodes are "Ready":
+
+[source]
+----
+oc get nodes
+----
+
+[source%nowrap,bash]
+----
+NAME                      STATUS   ROLES           AGE   VERSION
+master1.cluster.lab.com   Ready    master,worker   14h   v1.19.0+9f84db3
+master2.cluster.lab.com   Ready    master,worker   13h   v1.19.0+9f84db3
+master3.cluster.lab.com   Ready    master,worker   13h   v1.19.0+9f84db3
+----
+
+Check all operators are available:
+
+[source]
+----
+oc get co
+----
+
+[source%nowrap,bash]
+----
+NAME                                       VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
+authentication                             4.6.4     True        False         False      8m34s
+cloud-credential                           4.6.4     True        False         False      15h
+cluster-autoscaler                         4.6.4     True        False         False      13h
+config-operator                            4.6.4     True        False         False      13h
+console                                    4.6.4     True        False         False      7m35s
+csi-snapshot-controller                    4.6.4     True        False         False      13h
+dns                                        4.6.4     True        False         False      13h
+etcd                                       4.6.4     True        False         False      11h
+image-registry                             4.6.4     True        False         False      11h
+ingress                                    4.6.4     True        False         False      8m40s
+insights                                   4.6.4     True        False         False      13h
+kube-apiserver                             4.6.4     True        False         False      11h
+kube-controller-manager                    4.6.4     True        False         False      13h
+kube-scheduler                             4.6.4     True        False         False      13h
+kube-storage-version-migrator              4.6.4     True        False         False      13h
+machine-api                                4.6.4     True        False         False      13h
+machine-approver                           4.6.4     True        False         False      13h
+machine-config                             4.6.4     True        False         False      13h
+marketplace                                4.6.4     True        False         False      8m23s
+monitoring                                 4.6.4     True        False         False      8m18s
+network                                    4.6.4     True        False         False      13h
+node-tuning                                4.6.4     True        False         False      13h
+openshift-apiserver                        4.6.4     True        False         False      8m55s
+openshift-controller-manager               4.6.4     True        False         False      13h
+openshift-samples                          4.6.4     True        False         False      8m21s
+operator-lifecycle-manager                 4.6.4     True        False         False      13h
+operator-lifecycle-manager-catalog         4.6.4     True        False         False      13h
+operator-lifecycle-manager-packageserver   4.6.4     True        False         False      8m57s
+service-ca                                 4.6.4     True        False         False      13h
+storage                                    4.6.4     True        False         False      13h
+----
+
+Power off the bootstrap node (and destroy it) and comment out the node in both the `api` and `api-int` load balancers in `/etc/haproxy/haproxy.cfg`.
+
+The load balancers should look like the following screenshots, note that the ingress LB only has two replicas, therefore will show down on one of the nodes. 
+
+image::images/api-lb.png[API LB]
+image::images/ingress-lb.png[Ingress LB]
+
+==== Login
+
+During installation and from your client you can access the cluster using the `system:admin` account:
+
+[source]
+----
+export KUBECONFIG=cluster/auth/kubeconfig
+----
+
+[source]
+----
+oc whoami
+system:admin
+----
+
+Login is as `kubeadmin`:
+
+[source]
+----
+cat cluster/auth/kubeadmin-password
+----
+
+[source%nowrap,bash]
+----
+oc login -u kubeadmin -p kLsUd-GkkRt-GwPI7-n2cku  https://api.cluster.lab.com:6443
+----
+
+Login to the OpenShift web console:
+
+[source]
+----
+oc project openshift-console
+oc get routes
+----
+
+For example, in a browser https://console-openshift-console.apps.cluster.lab.com
+
+
+==== Troubleshooting
+
+===== Single master 
+
+It is possible to deploy a single node "cluster" if defined in the `install-config.yaml`, however the installation never completes, with operators pending. Apply the following patch for the installation to complete with a single master configuration:
+
+[source%nowrap,bash]
+----
+oc patch etcd cluster -p='{"spec": {"unsupportedConfigOverrides": {"useUnsupportedUnsafeNonHANonProductionUnstableEtcd": true}}}' --type=merge
+----
+
+===== Unknown authority
+
+The following error can sometimes occur when attempting to login to the API via the command line:
+
+[source]
+----
+error: x509: certificate signed by unknown authority
+----
+
+Switch projects:
+
+[source]
+----
+oc project openshift-authentication
+----
+
+List the pods in the `openshift-authentication` project:
+
+[source]
+----
+oc get pods
+----
+
+Using one of the pod names export the ingress certificate:
+
+[source%nowrap,bash]
+----
+oc rsh -n openshift-authentication oauth-openshift-568bcc5d8f-84zh2 cat /run/secrets/kubernetes.io/serviceaccount/ca.crt > ingress-ca.crt
+----
+
+Copy and update your certificate authority certificates on your client host:
+
+[source]
+----
+sudo cp ingress-ca.crt /etc/pki/ca-trust/source/anchors/
+sudo update-ca-trust extract
+----
+
+===== Missing Console
+
+If both the `openshift-samples` and `console` operators were absent during deployment of a cluster. Powering off all three masters and powering them back on brought all the operators up. 
+
 
 // This is a comment and won't be rendered.

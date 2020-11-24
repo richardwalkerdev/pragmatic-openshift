@@ -1,0 +1,207 @@
+=== CLUSTER LOGGING
+
+OpenShift comes with its native logging stack using Elasticsearch, Fluentd, and Kibana (EFK). It can be very resource-intensive, in a production environment dedicate resource plentiful "infra" nodes to run Elasticsearch and use decent block storage.
+
+Making do with limited resources for home lab environments.
+
+Install the "Elastic Search" and "Cluster Logging" operators via the Web Console, See https://docs.openshift.com/container-platform/4.6/logging/cluster-logging-deploying.html 
+
+CAUTION: Make sure you select operators provided by Red Hat, Inc and not proprietary or community versions. 
+
+Check the current state of the cluster-logging project:
+
+[source%nowrap,bash]
+----
+oc project openshift-logging
+----
+
+[source%nowrap,bash]
+----
+oc get pods
+----
+
+[source%nowrap,bash]
+----
+NAME                                       READY   STATUS    RESTARTS   AGE
+cluster-logging-operator-f58c98989-2jrxx   1/1     Running   0          28m
+----
+
+==== Ephemeral logging
+
+To run logging with ephemeral storage, meaning all of a pod’s data is lost upon restart because no real storage is provided, perfect for a lab.
+
+Via the web console, *Administration → Custom Resource Definitions → ClusterLogging → Instances → Create ClusterLogging*.
+
+Make note of the `resources: limits:`, The following example has reduced memory defined and `emptyDir: {}` for storage, `nodeSelector` can be omitted if no infra nodes are defined.
+
+Paste in the following logging instance:
+
+[source%nowrap,bash]
+----
+apiVersion: "logging.openshift.io/v1"
+kind: "ClusterLogging"
+metadata:
+  name: "instance"
+  namespace: "openshift-logging"
+spec:
+  managementState: "Managed"
+  logStore:
+    type: "elasticsearch"
+    retentionPolicy:
+      application:
+        maxAge: 1d
+      infra:
+        maxAge: 7d
+      audit:
+        maxAge: 7d
+    elasticsearch:
+      nodeCount: 3
+      nodeSelector:
+        node-role.kubernetes.io/infra: ''
+      storage: 
+        emptyDir: {}
+      redundancyPolicy: "SingleRedundancy"
+      resources:
+        limits:
+          memory: 3Gi
+        requests:
+          memory: 3Gi
+  visualization:
+    type: "kibana"
+    kibana:
+      replicas: 1
+  curation:
+    type: "curator"
+    curator:
+      schedule: "30 3 * * *"
+  collection:
+    logs:
+      type: "fluentd"
+      fluentd: {}
+----
+
+A working deployment should look something like this:
+
+[source%nowrap,bash]
+----
+oc project openshift-logging
+oc get pods
+----
+
+[source%nowrap,bash]
+----
+NAME                                            READY   STATUS    RESTARTS   AGE
+cluster-logging-operator-f58c98989-2jrxx        1/1     Running   0          53m
+elasticsearch-cdm-2p9fwrm5-1-8fff599cb-j7xh2    2/2     Running   0          3m4s
+elasticsearch-cdm-2p9fwrm5-2-944758ff6-zrv9p    2/2     Running   0          3m1s
+elasticsearch-cdm-2p9fwrm5-3-68bfc4b584-vbdqp   2/2     Running   0          2m58s
+fluentd-bzmw4                                   1/1     Running   0          3m11s
+fluentd-msv2p                                   1/1     Running   0          3m11s
+fluentd-sglqw                                   1/1     Running   0          3m12s
+kibana-86f69c8b84-62b7r                         2/2     Running   0          3m7s
+----
+
+Fluentd runs an instance on every node in the cluster. 
+
+==== Local storage logging
+
+Assuming the PVs are available with a storage class of `local-sc` as described in the #_local_storage_operator section of this document. The following logging instance includes the storage class definition. Both the `storageClassName` and `size` are added:
+
+[source%nowrap,bash]
+----
+apiVersion: "logging.openshift.io/v1"
+kind: "ClusterLogging"
+metadata:
+  name: "instance"
+  namespace: "openshift-logging"
+spec:
+  managementState: "Managed"
+  logStore:
+    type: "elasticsearch"
+    retentionPolicy:
+      application:
+        maxAge: 1d
+      infra:
+        maxAge: 7d
+      audit:
+        maxAge: 7d
+    elasticsearch:
+      nodeCount: 3
+      nodeSelector:
+        node-role.kubernetes.io/infra: ''
+      storage:
+        storageClassName: local-sc
+        size: 50G
+      redundancyPolicy: "SingleRedundancy"
+      resources:
+        limits:
+          memory: 3Gi
+        requests:
+          memory: 3Gi
+  visualization:
+    type: "kibana"
+    kibana:
+      replicas: 1
+  curation:
+    type: "curator"
+    curator:
+      schedule: "30 3 * * *"
+  collection:
+    logs:
+      type: "fluentd"
+      fluentd: {}
+----
+
+[source%nowrap,bash]
+----
+oc project openshift-logging
+oc get pods
+----
+
+If successful, the PVC should be claimed and bound:
+
+[source%nowrap,bash]
+----
+oc get pvc
+----
+
+[source%nowrap,bash]
+----
+NAME                                         STATUS   VOLUME              CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+elasticsearch-elasticsearch-cdm-lk4f9958-1   Bound    local-pv-d4d267e6   50Gi       RWO            local-sc       22s
+elasticsearch-elasticsearch-cdm-lk4f9958-2   Bound    local-pv-297ca047   50Gi       RWO            local-sc       22s
+elasticsearch-elasticsearch-cdm-lk4f9958-3   Bound    local-pv-6317e505   50Gi       RWO            local-sc       22s
+----
+
+==== Troubleshooting
+
+[source%nowrap,bash]
+----
+oc project openshift-logging
+oc get pods
+----
+
+===== Insufficient memory
+
+[source%nowrap,bash]
+----
+oc describe pod elasticsearch-cdm-uz12dkcd-1-6cf9ff6cb9-945gg
+----
+
+[source%nowrap,bash]
+----
+Events:
+  Type     Reason            Age   From               Message
+  ----     ------            ----  ----               -------
+  Warning  FailedScheduling  33m   default-scheduler  0/6 nodes are available: 3 Insufficient memory, 3 node(s) didn't match node selector.
+----
+
+Resource limits set for elasticsearch must be available on the nodes, either increase memory on the hosts or decrease the memory in the settings. 
+
+===== Delete cluster logging
+
+*Administration → Custom Resource Definitions → ClusterLogging → Instances → Create ClusterLogging*
+
+Delete the cluster logging instance. 
+
+// This is a comment and won't be rendered.

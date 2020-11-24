@@ -1,5 +1,266 @@
-=== Nodes
+=== NODES
 
-==== Infra
+For a home lab, it might be common to leave the cluster as a minimal three-node cluster.  Resources can be tight; however, in the real world, it is likely to provision dedicated infra nodes and many worker nodes.  
+It is then possible to label nodes accordingly and mark specific applications to only run on designated infrastructure. 
 
-==== Worker
+TIP: Whatever the labelling conventions used, all nodes from this point are "worker" nodes with labels. 
+
+==== Infra nodes
+
+To avoid duplication just the key details are included, in this case three infra VMs are provisioned with bridged networking, each with 8GB Memory, 2 cores and 50GB storage. Pay close attention to the IP Addresses and the use of the `worker.ign` ignition file. 
+
+*`infra1.cluster.lab.com`*
+
+[source%nowrap,bash]
+----
+nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.131/24 ipv4.gateway 192.168.0.1 ipv4.dns 192.168.0.101 connection.autoconnect yes
+----
+
+[source]
+----
+sudo systemctl restart NetworkManager
+nmcli con up 'Wired Connection'
+----
+
+[source%nowrap]
+----
+sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/worker.ign /dev/sda --insecure-ignition --copy-network 
+----
+
+[source%nowrap]
+----
+ip=192.168.0.131::192.168.0.1:255.255.255.0:infra1.cluster.lab.com:ens3:none nameserver=192.168.0.101
+----
+
+The node should deploy as seen while doing master nodes but worker nodes get provisioned by the masters. Once a worker node has booted up off its hard drive and arrived at the login prompt, they will be a reboot.
+
+Check for certificate signing requests, as a cluster administrator view any pending csr:
+
+[source]
+----
+oc get csr
+----
+
+Refined:
+
+[source]
+----
+oc get csr | grep -i pending
+----
+
+Approve them:
+
+[source]
+----
+oc adm certificate approve csr-xyz
+----
+
+Typically, approving the first pending CSR, will cause a second one to appear shortly afterwards.
+
+Once both CRS are approved you'll see the node with a status NotReady:
+
+[source]
+----
+oc get nodes
+----
+
+[source]
+----
+NAME                      STATUS     ROLES           AGE   VERSION
+infra1.cluster.lab.com    NotReady   worker          25s   v1.19.0+9f84db3
+master1.cluster.lab.com   Ready      master,worker   16h   v1.19.0+9f84db3
+master2.cluster.lab.com   Ready      master,worker   15h   v1.19.0+9f84db3
+master3.cluster.lab.com   Ready      master,worker   14h   v1.19.0+9f84db3
+----
+
+The deployment of the node is still in progress, eventually the node with change status to "Ready".
+
+Example when all three infra nodes are initially added to the cluster:
+
+[source]
+----
+NAME                      STATUS     ROLES           AGE   VERSION
+infra1.cluster.lab.com    Ready      worker          68s   v1.19.0+9f84db3
+infra2.cluster.lab.com    Ready      worker          32m   v1.19.0+9f84db3
+infra3.cluster.lab.com    Ready      worker          11m   v1.19.0+9f84db3
+master1.cluster.lab.com   Ready      master,worker   16h   v1.19.0+9f84db3
+master2.cluster.lab.com   Ready      master,worker   15h   v1.19.0+9f84db3
+master3.cluster.lab.com   Ready      master,worker   15h   v1.19.0+9f84db3
+----
+
+You repeat this for any other infra nodes desired, most commonly at least three to achieve high availability, as depicted in the example above.
+
+NOTE: Notice the `ROLE` for the infra node is currently set to `worker`.
+
+===== Label infra nodes
+
+Create the infra machine config pool `infra-mcp.yaml`:
+
+[source%nowrap,yaml]
+----
+apiVersion: machineconfiguration.openshift.io/v1
+kind: MachineConfigPool
+metadata:
+  name: infra
+spec:
+  machineConfigSelector:
+    matchExpressions:
+      - {key: machineconfiguration.openshift.io/role, operator: In, values: [worker,infra]}
+  maxUnavailable: 1
+  nodeSelector:
+    matchLabels:
+      node-role.kubernetes.io/infra: ""
+  paused: false
+----
+
+[source]
+----
+oc create -f infra-mcp.yaml
+----
+
+Label infra nodes and remove worker label:
+
+CAUTION: The adding of infra label forces a reboot of the node, wait for reboot before removing the worker label
+
+[source%nowrap]
+----
+oc label node infra1.cluster.lab.com node-role.kubernetes.io/infra=
+oc label node infra2.cluster.lab.com node-role.kubernetes.io/infra=
+oc label node infra3.cluster.lab.com node-role.kubernetes.io/infra=
+----
+
+Each node will be marked as non-schedulable and reboot in turn:
+
+[source]
+----
+watch oc get nodes
+----
+
+[source%nowrap]
+----
+infra1.cluster.lab.com    Ready,SchedulingDisabled   infra,worker    5m3s   v1.19.0+9f84db3
+----
+
+Once completed, each infra node will be labelled both `infra,worker`, remove the `worker` label from each:
+
+[source%nowrap]
+----
+oc label node infra1.cluster.lab.com node-role.kubernetes.io/worker-
+oc label node infra2.cluster.lab.com node-role.kubernetes.io/worker-
+oc label node infra3.cluster.lab.com node-role.kubernetes.io/worker-
+----
+
+Node should look like:
+
+[source%nowrap]
+----
+oc get nodes
+----
+
+[source%nowrap]
+----
+NAME                      STATUS   ROLES           AGE   VERSION
+infra1.cluster.lab.com    Ready    infra           11m   v1.19.0+9f84db3
+infra2.cluster.lab.com    Ready    infra           42m   v1.19.0+9f84db3
+infra3.cluster.lab.com    Ready    infra           21m   v1.19.0+9f84db3
+master1.cluster.lab.com   Ready    master,worker   16h   v1.19.0+9f84db3
+master2.cluster.lab.com   Ready    master,worker   15h   v1.19.0+9f84db3
+master3.cluster.lab.com   Ready    master,worker   15h   v1.19.0+9f84db3
+----
+
+==== Worker nodes
+
+Add worker nodes by repeating the same process as adding infra nodes without any labelling. Making sure IP Addresses and host names are correct during the process.
+
+A typical deployment might look like this:
+
+[source%nowrap]
+----
+NAME                      STATUS   ROLES           AGE   VERSION
+infra1.cluster.lab.com    Ready    infra           11m   v1.19.0+9f84db3
+infra2.cluster.lab.com    Ready    infra           42m   v1.19.0+9f84db3
+infra3.cluster.lab.com    Ready    infra           21m   v1.19.0+9f84db3
+master1.cluster.lab.com   Ready    master,worker   16h   v1.19.0+9f84db3
+master2.cluster.lab.com   Ready    master,worker   15h   v1.19.0+9f84db3
+master3.cluster.lab.com   Ready    master,worker   15h   v1.19.0+9f84db3
+worker1.cluster.lab.com   Ready    worker          68s   v1.19.0+9f84db3
+worker2.cluster.lab.com   Ready    worker          32m   v1.19.0+9f84db3
+worker3.cluster.lab.com   Ready    worker          11m   v1.19.0+9f84db3
+----
+
+==== Move ingress router
+
+It's common practice to move the ingress router off the master nodes and run three replicas on the infra nodes. With the correctly labelled infranodes in place this is done with the following two patches.
+
+
+[source%nowrap]
+----
+oc patch -n openshift-ingress-operator ingresscontroller/default --patch '{"spec":{"nodePlacement": {"nodeSelector":{"matchLabels":{"node-role.kubernetes.io/infra": "" }}}}}' --type=merge
+----
+
+[source%nowrap]
+----
+oc patch -n openshift-ingress-operator ingresscontroller/default --patch '{"spec":{"replicas": 3}}' --type=merge
+----
+
+IMPORTANT: Update the backend ingress load balancer, in this case, HAProxy, to now point at the three infra nodes.
+
+==== Disable master scheduler
+
+Disabling the master scheduler removes the "worker" label from master nodes, preventing unwanted applications from running on master nodes, reserving their resources for running the cluster. 
+
+[source%nowrap]
+----
+oc edit scheduler
+----
+
+Set mastersSchedulable to false:
+
+[source%nowrap]
+----
+apiVersion: config.openshift.io/v1
+kind: Scheduler
+metadata:
+  creationTimestamp: null
+  name: cluster
+spec:
+  mastersSchedulable: false
+  policy:
+    name: ""
+status: {}
+----
+
+Validate:
+
+[source%nowrap]
+----
+oc get nodes
+----
+
+[source%nowrap]
+----
+NAME                      STATUS   ROLES           AGE   VERSION
+infra1.cluster.lab.com    Ready    infra           11m   v1.19.0+9f84db3
+infra2.cluster.lab.com    Ready    infra           42m   v1.19.0+9f84db3
+infra3.cluster.lab.com    Ready    infra           21m   v1.19.0+9f84db3
+master1.cluster.lab.com   Ready    master          16h   v1.19.0+9f84db3
+master2.cluster.lab.com   Ready    master          15h   v1.19.0+9f84db3
+master3.cluster.lab.com   Ready    master          15h   v1.19.0+9f84db3
+worker1.cluster.lab.com   Ready    worker          68s   v1.19.0+9f84db3
+worker2.cluster.lab.com   Ready    worker          32m   v1.19.0+9f84db3
+worker3.cluster.lab.com   Ready    worker          11m   v1.19.0+9f84db3
+----
+
+==== Delete nodes
+
+[source%nowrap]
+----
+oc get nodes
+----
+
+[source%nowrap]
+----
+oc delete node infra1.cluster.lab.com
+----
+
+// This is a comment and won't be rendered.

@@ -1,5 +1,5 @@
 
-=== Infrastructure
+=== INFRASTRUCTURE
 
 Infrastructure is the compute resources that software platforms get deployed on to. Traditionally and as demonstrated in this documentation that can be physical hardware. It might mean virtualisation using hypervisors such as VMware, Red Hat Virtualisation or  Hyper-V for example. Most commonly, it will likely mean cloud infrastructure. Cloud infrastructure builds on virtualisation providing on-demand abstracted resources such as hardware,  storage, and network resources.
 
@@ -7,7 +7,7 @@ In reality, cloud infrastructure resources are costly and move capital expenditu
 
 This guide demonstrates using  Intel® NUC's for master nodes, which are affordable, compact with low power consumption.  Furthermore, a Raspberry Pi used for the core utility services including DNS, Load Balancer and Apache webserver. 
 
-==== Architecture Overview 
+==== Architecture overview 
 
 The following diagram is a high-level overview of the lab environment deployed in this document. It depicts both the physical hosts and virtual hosts that make up a hybrid cluster.  The virtual hosts include the temporary bootstrap host, only needed during the initial deployment of the three master nodes. 
 
@@ -79,8 +79,5 @@ The following table includes the details of the environment used throughout this
 | KVM VM, 4 core, 16GB RAM, 120GB storage
 
 |===
-
-
-
 
 // This is a comment and won't be rendered.

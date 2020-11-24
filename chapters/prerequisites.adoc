@@ -1,4 +1,4 @@
-=== Prerequisites
+=== PREREQUISITES
 
 Getting the prerequisites right is the essential part of deploying OpenShift. Mistakes with DNS, load balancing or networking in general, will only lead problems with the deployment of the cluster. Troubleshooting OpenShift deployments is notoriously challenging and often misleading towards the real root cause of issues. 
 
@@ -383,7 +383,7 @@ systemctl enable haproxy.service --now
 
 View the graphical statistics report at http://192.168.0.101:9000/stats. In this example the username is `admin` and password is `changeme`. If you've pointed your local client to use `192.168.0.101` for its DNS, try http://lb.cluster.lab.com:9000/stats.
 
-==== Apache Web Server
+==== Apache web server
 
 Install and configure `httpd` on port `8080` (because port 80 is already used by HAProxy)
 
