@@ -8,7 +8,7 @@ WARNING: NFS is NOT recommended and decent block storage should be used, refer t
 
 ==== NFS requirements
 
-Refer to *LINK* for setting up NFS.
+Refer to https://www.richardwalker.dev/pragmatic-openshift/#_installation for setting up NFS.
 
 Prepare the following NFS shares:
 
