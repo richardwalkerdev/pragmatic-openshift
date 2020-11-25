@@ -1,0 +1,29 @@
+=== ETCD ENCRYPTION
+
+[source%nowrap,bash]
+----
+oc edit apiserver
+----
+
+[source%nowrap,bash]
+----
+spec:
+  encryption:
+    type: aescbc
+----
+
+Check `status.progress` of OpenShift API:
+
+[source%nowrap,bash]
+----
+oc get openshiftapiserver -o=jsonpath='{range .items[0].status.conditions[?(@.type=="Encrypted")]}{.reason}{"\n"}{.message}{"\n"}'
+----
+
+Check status.progress of Kubernetes API:
+
+[source%nowrap,bash]
+----
+oc get kubeapiserver -o=jsonpath='{range .items[0].status.conditions[?(@.type=="Encrypted")]}{.reason}{"\n"}{.message}{"\n"}'
+----
+
+// This is a comment and won't be rendered.

@@ -1,0 +1,418 @@
+=== MONITORING
+
+Configuring the cluster monitoring stack on OpenShift Container Platform.
+
+The document demonstrates deploying the monitoring stack using NFS storage.
+
+WARNING: NFS is NOT recommended and decent block storage should be used, refer to the official documentation and substitute the storage class for a recommend one.   
+
+==== NFS requirements
+
+Refer to *LINK* for setting up NFS.
+
+Prepare the following NFS shares:
+
+[source%nowrap,bash]
+----
+/mnt/openshift/alertmanager1    192.168.0.1/24(rw,sync,no_wdelay,no_root_squash,insecure)
+/mnt/openshift/alertmanager2    192.168.0.1/24(rw,sync,no_wdelay,no_root_squash,insecure)
+/mnt/openshift/alertmanager3    192.168.0.1/24(rw,sync,no_wdelay,no_root_squash,insecure)
+/mnt/openshift/prometheus1      192.168.0.1/24(rw,sync,no_wdelay,no_root_squash,insecure)
+/mnt/openshift/prometheus2      192.168.0.1/24(rw,sync,no_wdelay,no_root_squash,insecure)
+----
+
+Ensure permissions on the share directories:
+
+[source%nowrap,bash]
+----
+chmod 775 /mnt/openshift/*
+----
+
+Exported the new shares with:
+
+[source%nowrap,bash]
+----
+exportfs -arv
+----
+
+And confirmed the shares are visible:
+
+[source%nowrap,bash]
+----
+exportfs  -s
+showmount -e 127.0.0.1
+----
+
+==== Alert manager
+
+These steps demonstrate how to add persistent storage for Alert Manager. 
+
+===== Create PVs
+
+With shares available,  add the alert manager PVs, NOTE: the `accessMode` is set to `ReadWriteOnce`:
+
+[source%nowrap,bash]
+----
+vi alert-manager-nfs-pv.yaml
+----
+
+[source%nowrap,bash]
+----
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: alertmanager-pv1
+spec:
+  capacity:
+    storage: 40Gi
+  accessModes:
+  - ReadWriteOnce
+  nfs:
+    path: /mnt/openshift/alertmanager1
+    server: 192.168.0.15
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: alertmanager-pv2
+spec:
+  capacity:
+    storage: 40Gi
+  accessModes:
+  - ReadWriteOnce
+  nfs:
+    path: /mnt/openshift/alertmanager2
+    server: 192.168.0.15
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: alertmanager-pv3
+spec:
+  capacity:
+    storage: 40Gi
+  accessModes:
+  - ReadWriteOnce
+  nfs:
+    path: /mnt/openshift/alertmanager3
+    server: 192.168.0.15
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+----
+
+[source%nowrap,bash]
+----
+oc create -f alert-manager-nfs-pv.yaml
+----
+
+Use `oc get pv` to display PVs.
+
+===== Configure
+
+First, check whether the `cluster-monitoring-config` ConfigMap object exists:
+
+[source%nowrap,bash]
+----
+oc -n openshift-monitoring get configmap cluster-monitoring-config
+----
+
+----
+Error from server (NotFound): configmaps "cluster-monitoring-config" not found
+----
+
+If not, create it:
+
+[source%nowrap,bash]
+----
+vi cluster-monitoring-config.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+----
+
+[source%nowrap,bash]
+----
+oc apply -f cluster-monitoring-config.yaml
+----
+
+[source%nowrap,bash]
+----
+oc -n openshift-monitoring get configmap cluster-monitoring-config
+----
+
+[source%nowrap,bash]
+----
+NAME                        DATA   AGE
+cluster-monitoring-config   1      3s
+----
+
+This step is easier via the web console, amend *Workloads → Config Maps* (Select Project `openshift-monitoring)` *→ "cluster-monitoring-config" → YAML*
+
+Add the following:
+
+[source%nowrap,bash]
+----
+data:
+  config.yaml: |+
+    alertmanagerMain:
+      volumeClaimTemplate:
+        metadata:
+          name: alertmanager-claim
+        spec:
+          storageClassName: nfs
+          resources:
+            requests:
+              storage: 40Gi
+----
+
+Take note of the storage size, storage class name and node selector (if applicable) for your environment.
+
+Make sure you in the right project:
+
+[source%nowrap,bash]
+----
+oc project openshift-monitoring
+----
+
+You should see the three `alertmanager-main` pods recreating:
+
+[source%nowrap,bash]
+----
+oc get pods
+----
+[source%nowrap,bash]
+----
+NAME                                           READY   STATUS              RESTARTS   AGE
+alertmanager-main-0                            0/5     ContainerCreating   0          36s
+alertmanager-main-1                            0/5     ContainerCreating   0          36s
+alertmanager-main-2                            0/5     ContainerCreating   0          36s
+----
+
+And the that PVCs have been claimed:
+
+[source%nowrap,bash]
+----
+oc get pvc
+----
+
+[source%nowrap,bash]
+----
+NAME                                     STATUS   VOLUME             CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+alertmanager-claim-alertmanager-main-0   Bound    alertmanager-pv1   40Gi       RWO            nfs            26h
+alertmanager-claim-alertmanager-main-1   Bound    alertmanager-pv3   40Gi       RWO            nfs            26h
+alertmanager-claim-alertmanager-main-2   Bound    alertmanager-pv2   40Gi       RWO            nfs            26h
+----
+
+==== Prometheus
+
+===== Create PVs
+
+Add the prometheus PVs:
+
+[source%nowrap,bash]
+----
+vi prometheus-nfs-pv.yaml
+----
+
+[source%nowrap,bash]
+----
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: prometheus-pv1
+spec:
+  capacity:
+    storage: 40Gi
+  accessModes:
+  - ReadWriteOnce
+  nfs:
+    path: /mnt/openshift/prometheus1
+    server: 192.168.0.15
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: prometheus-pv2
+spec:
+  capacity:
+    storage: 40Gi
+  accessModes:
+  - ReadWriteOnce
+  nfs:
+    path: /mnt/openshift/prometheus2
+    server: 192.168.0.15
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+----
+[source%nowrap,bash]
+----
+oc create -f prometheus-nfs-pv.yaml
+----
+
+===== Configure
+
+Again via the web console, amend *Workloads → Config Maps* (Select Project `openshift-monitoring`) *→ "cluster-monitoring-config" → YAML*
+
+And add the following:
+
+[source%nowrap,bash]
+----
+    prometheusK8s:
+      volumeClaimTemplate:
+          metadata:
+            name: prometheus-claim
+          spec:
+            storageClassName: nfs
+            resources:
+              requests:
+                storage: 40Gi
+----
+
+Note, this is appended so the whole configuration should look like this:
+
+[source%nowrap,bash]
+----
+data:
+  config.yaml: |+
+    alertmanagerMain:
+      volumeClaimTemplate:
+        metadata:
+          name: alertmanager-claim
+        spec:
+          storageClassName: nfs
+          resources:
+            requests:
+              storage: 40Gi
+    prometheusK8s:
+      volumeClaimTemplate:
+          metadata:
+            name: prometheus-claim
+          spec:
+            storageClassName: nfs
+            resources:
+              requests:
+                storage: 40Gi
+----
+
+Once completed, you should see all the PVCs have been claimed:
+
+[source%nowrap,bash]
+----
+oc get pvc
+----
+[source%nowrap,bash]
+----
+NAME                                     STATUS   VOLUME             CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+alertmanager-claim-alertmanager-main-0   Bound    alertmanager-pv1   40Gi       RWO            nfs            4m32s
+alertmanager-claim-alertmanager-main-1   Bound    alertmanager-pv3   40Gi       RWO            nfs            4m32s
+alertmanager-claim-alertmanager-main-2   Bound    alertmanager-pv2   40Gi       RWO            nfs            4m32s
+prometheus-claim-prometheus-k8s-0        Bound    prometheus-pv1     40Gi       RWO            nfs            14s
+prometheus-claim-prometheus-k8s-1        Bound    prometheus-pv2     40Gi       RWO            nfs            14s
+----
+
+And everything running correctly:
+
+[source%nowrap,bash]
+----
+oc get pods
+----
+
+[source%nowrap,bash]
+----
+NAME                                           READY   STATUS    RESTARTS   AGE
+alertmanager-main-0                            5/5     Running   0          26h
+alertmanager-main-1                            5/5     Running   0          26h
+alertmanager-main-2                            5/5     Running   0          26h
+cluster-monitoring-operator-75f6b78475-4f4s9   2/2     Running   3          2d2h
+grafana-74564f7ff4-sqw8g                       2/2     Running   0          2d2h
+kube-state-metrics-b6fb95865-hzsst             3/3     Running   0          2d2h
+node-exporter-ccmbm                            2/2     Running   0          2d2h
+node-exporter-n5sdt                            2/2     Running   0          2d2h
+node-exporter-psbt4                            2/2     Running   0          2d2h
+openshift-state-metrics-5894b6c4df-fv9km       3/3     Running   0          2d2h
+prometheus-adapter-58d9999987-9lltc            1/1     Running   0          27h
+prometheus-adapter-58d9999987-lhtvc            1/1     Running   0          27h
+prometheus-k8s-0                               7/7     Running   1          26h
+prometheus-k8s-1                               7/7     Running   1          26h
+prometheus-operator-68f6b4f6bb-4mxcn           2/2     Running   0          47h
+telemeter-client-79d6fc74c-wjqgw               3/3     Running   0          2d2h
+thanos-querier-66f4b4c758-2z4f6                4/4     Running   0          2d2h
+thanos-querier-66f4b4c758-fsqfz                4/4     Running   0          2d2h
+----
+
+==== Node selectors
+
+If using infra nodes, add node selectors to the configuration, here is a complete example for OCP 4.6:
+
+[source%nowrap,bash]
+----
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |+
+    alertmanagerMain:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+      volumeClaimTemplate:
+        metadata:
+          name: alertmanager-claim
+        spec:
+          storageClassName: local-sc
+          resources:
+            requests:
+              storage: 40Gi
+    prometheusK8s:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+      volumeClaimTemplate:
+          metadata:
+            name: prometheus-claim
+          spec:
+            storageClassName: local-sc
+            resources:
+              requests:
+                storage: 40Gi
+    prometheusOperator:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+    grafana:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+    k8sPrometheusAdapter:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+    kubeStateMetrics:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+    telemeterClient:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+    openshiftStateMetrics:
+      nodeSelector:
+        node-role.kubernetes.io/infra: ""
+    thanosQuerier:
+      nodeSelector:
+        nodename: worker1.cluster.lab.com
+        nodename: worker2.cluster.lab.com
+----
+
+// This is a comment and won't be rendered.

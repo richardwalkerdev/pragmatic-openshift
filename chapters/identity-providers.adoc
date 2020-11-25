@@ -204,6 +204,536 @@ Test the service locally:
 ldapsearch -h 127.0.0.1 -p 389 -D cn=admin,dc=planetexpress,dc=com -w GoodNewsEveryone -b "dc=planetexpress,dc=com" -s sub "(objectclass=*)"
 ----
 
+Optionally, add a DNS entry `ldap.cluster.lab.com` and a load balancer in HAProxy:
 
+[source%nowrap,bash]
+----
+frontend ldap
+    bind 0.0.0.0:389
+    option tcplog
+    mode tcp
+    default_backend ldap
+
+backend ldap
+    mode tcp
+    balance roundrobin
+    server ldap 192.168.0.15:389 check
+----
+
+List erveything:
+
+[source%nowrap,bash]
+----
+ldapsearch -h ldap.cluster.lab.com -p 389 -D cn=admin,dc=planetexpress,dc=com -w GoodNewsEveryone -b "dc=planetexpress,dc=com" -s sub "(objectclass=*)"
+----
+
+List only users returning only the common names and uid:
+
+[source%nowrap,bash]
+----
+ldapsearch -h ldap.cluster.lab.com -p 389 -D cn=admin,dc=planetexpress,dc=com -w GoodNewsEveryone -x -s sub -b "ou=people,dc=planetexpress,dc=com" "(objectclass=inetOrgPerson)" cn uid
+----
+
+List only groups:
+
+[source%nowrap,bash]
+----
+ldapsearch -h ldap.cluster.lab.com -p 389 -D cn=admin,dc=planetexpress,dc=com -w GoodNewsEveryone -x -s sub -b "ou=people,dc=planetexpress,dc=com" "(objectclass=Group)"
+----
+
+===== LDAP Identity Provider
+
+Add a secret to OpenShift that contains the LDAP bind password:
+
+Admin account:
+
+[source]
+----
+cn=admin,dc=planetexpress,dc=com
+----
+
+Bind password:
+
+[source]
+----
+GoodNewsEveryone
+----
+
+Create a secret called `ldap-bind-password` in the `openshift-config` name-space:
+
+[source%nowrap,bash]
+----
+oc create secret generic ldap-bind-password --from-literal=bindPassword=GoodNewsEveryone -n openshift-config
+----
+
+Either use the web console to append the LDAP identity by navigating to *Administration -> Cluster Settings -> Global Configuration -> OAuth*.
+
+Or via the CLI:
+
+[source]
+----
+oc project openshift-authentication
+oc get OAuth
+oc edit OAuth cluster
+----
+
+Below `spec:`` add the `-ldap` part, for example:
+
+[source%nowrap,yaml]
+----
+spec:
+  identityProviders:
+    - htpasswd:
+        fileData:
+          name: htpass-secret
+      mappingMethod: claim
+      name: htpasswd_provider
+      type: HTPasswd
+    - ldap:
+        attributes:
+          email:
+            - mail
+          id:
+            - dn
+          name:
+            - cn
+          preferredUsername:
+            - uid
+        bindDN: 'cn=admin,dc=planetexpress,dc=com'
+        bindPassword:
+          name: ldap-bind-password
+        insecure: true
+        url: 'ldap://ldap.cluster.lab.com/DC=planetexpress,DC=com?uid?sub?(memberOf=cn=admin_staff,ou=people,dc=planetexpress,dc=com)'
+      mappingMethod: claim
+      name: ldap
+      type: LDAP
+----
+
+In the `openshift-authentication` project, there will be two pods `oauth-openshift-xxxxxxxxxx-xxxxx`. These we be terminated and recreated every time you make a change to the configuration. Once saving changes, expect to see something like this:
+
+[source%nowrap,bash]
+----
+oc get pods
+----
+
+[source%nowrap,bash]
+----
+NAME                                 READY   STATUS              RESTARTS   AGE
+oauth-openshift-7f95bc7996-5vl2z     1/1     Terminating         0          13m
+oauth-openshift-7f95bc7996-854xb     1/1     Terminating         0          13m
+oauth-openshift-ccd6bc654-mrbc6      1/1     Running             0          17s
+oauth-openshift-ccd6bc654-qh29m      1/1     Running             0          7s
+----
+
+For troubleshooting issues you can tail the logs for each of the running pods, for example:
+
+[source]
+----
+oc logs oauth-openshift-ccd6bc654-mrbc6 -f
+----
+
+The web console will now have a "Log in with" option for LDAP, and in this case, the user `hermes` (with password `hermes`) should be able to log in because that user is a member of the `admin_staff` group. Trying the user `fry` (with password `fry`) fails because they are NOT a member of the `admin_staff` group.
+
+The example in this document is fundamental. In the real world, there is often trial and error, the key is being able to search LDAP an understand the directory information tree (DIT).
+
+For including more that one group in the LDAP identity provider, you can use the following syntax:
+
+[source%nowrap,bash]
+----
+ldap://ldap.cluster.lab.com/DC=planetexpress,DC=com?uid?sub??(|(memberOf=cn=admin_staff,ou=people,dc=planetexpress,dc=com)(memberOf=cn=ship_crew,ou=people,dc=planetexpress,dc=com))
+----
+
+This will allow any user from either `admin_staff` or `ship_crew` group to login.
+
+Where TLS is in use, add a `configmap` in the `openshift-config` namespace: 
+
+[source%nowrap,bash]
+----
+oc create configmap ldap-ca-bundle --from-file=ca.crt=/root/ocp4/ssl/ca.crt -n openshift-config
+----
+
+Include the following options and use the `ldaps` syntax for port 636:
+
+[source]
+----
+ca:
+  name: ldap-ca-bundle
+insecure: false
+url: >-
+  ldaps://ldap.cluster.lab.com/...
+----
+
+===== LDAP Group Sync
+
+Two groups exist in the testing directory `admin_staff` and `ship_crew`. To add groups in OpenShift that match those two groups in LDAP, automate this within OpenShift at regular internals using a Cron Job. The Cron job needs a Service Account, A Cluster Role, a Cluster Role binding and a ConfigMap.
+
+====== Pre-testing
+
+Before we create anything in OpenShift, try things out from the CLI first and make sure that the data for `ldap-group-sync.yaml` to be stored in the ConfigMap is correct and returns the desired results.
+
+Create a file called ldap_sync_config.yaml:
+
+[source%nowrap,bash]
+----
+kind: LDAPSyncConfig
+apiVersion: v1
+url: ldap://ldap.cluster.lab.com:389
+insecure: true
+bindDN: "cn=admin,dc=planetexpress,dc=com"
+bindPassword: "GoodNewsEveryone"
+rfc2307:
+    groupsQuery:
+        baseDN: "ou=people,dc=planetexpress,dc=com"
+        scope: sub
+        filter: "(objectClass=Group)"
+        derefAliases: never
+    groupUIDAttribute: dn
+    groupNameAttributes: [ cn ]
+    groupMembershipAttributes: [ member ]
+    usersQuery:
+        baseDN: "ou=people,dc=planetexpress,dc=com"
+        scope: sub
+        derefAliases: never
+    userUIDAttribute: dn
+    userNameAttributes: [ uid ]
+    tolerateMemberNotFoundErrors: true 
+    tolerateMemberOutOfScopeErrors: true 
+----
+
+Experiment with `ldap_sync_config.yaml` using this safe "dry-run" command to get your desired results:
+
+[source%nowrap,bash]
+----
+oc adm groups sync --sync-config=ldap_sync_config.yaml
+----
+
+Nothing is final or committed until you add `--confirm` to the command:
+
+[source%nowrap,bash]
+----
+oc adm groups sync --sync-config=ldap_sync_config.yaml --confirm
+----
+
+The example provided should return the two groups `admin_staff` and `ship_crew`.
+
+You could just run it the once and create the groups in OpenShift as a one-off task, but in the real-world, directories can be huge and often changes with starters and leavers etc. 
+
+====== Cron Job
+
+This requires the bind password in the project `openshift-authentication`:
+
+[source%nowrap,bash]
+----
+oc create secret generic ldap-sync-bind-password --from-literal=bindPassword=GoodNewsEveryone -n openshift-authentication
+----
+
+The next three steps are generic, adding a service account, Cluster role and Cluster role binding. They can be applied individually or amalgamated into one file to create all three in one go, I've split them out for clarity of each component:
+
+Service Account:
+
+[source%nowrap,bash]
+----
+vi ldap_sync_sa.yaml
+----
+[source%nowrap,bash]
+----
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: ldap-group-syncer
+  namespace: openshift-authentication
+  labels:
+    app: cronjob-ldap-group-sync
+----
+
+[source%nowrap,bash]
+----
+oc create -f ldap_sync_sa.yaml
+----
+
+Cluster Role:
+
+[source%nowrap,bash]
+----
+vi ldap_sync_cr.yaml
+----
+[source%nowrap,bash]
+----
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ldap-group-syncer
+  labels:
+    app: cronjob-ldap-group-sync
+rules:
+  - apiGroups:
+      - ''
+      - user.openshift.io
+    resources:
+      - groups
+    verbs:
+      - get
+      - list
+      - create
+      - update
+----
+
+[source%nowrap,bash]
+----
+oc create -f ldap_sync_cr.yaml
+----
+
+Cluster Role Binding:
+
+[source%nowrap,bash]
+----
+vi ldap_sync_crb.yaml
+----
+
+[source%nowrap,bash]
+----
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ldap-group-syncer
+  labels:
+    app: cronjob-ldap-group-sync
+subjects:
+  - kind: ServiceAccount
+    name: ldap-group-syncer
+    namespace: openshift-authentication
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: ldap-group-syncer
+----
+
+[source%nowrap,bash]
+----
+oc create -f ldap_sync_crb.yaml
+----
+
+ConfigMap:
+
+This ConfigMap adds the file `ldap-group-sync.yaml` used earlier for testing things out or synchronizing groups manually from the CLI. The `ConfigMap` is a resource made available in OpenShift that the final Cron Job will utilise:
+
+[source%nowrap,bash]
+----
+vi ldap_sync_cm.yaml
+----
+[source%nowrap,bash]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: ldap-group-syncer
+  namespace: openshift-authentication
+  labels:
+    app: cronjob-ldap-group-sync
+data:
+  ldap-group-sync.yaml: |
+    kind: LDAPSyncConfig
+    apiVersion: v1
+    url: ldap://ldap.cluster.lab.com:389
+    insecure: true
+    bindDN: "cn=admin,dc=planetexpress,dc=com"
+    bindPassword:
+      file: "/etc/secrets/bindPassword" 
+    rfc2307:
+      groupsQuery:
+          baseDN: "ou=people,dc=planetexpress,dc=com"
+          scope: sub
+          filter: "(objectClass=Group)"
+          derefAliases: never
+          pageSize: 0
+      groupUIDAttribute: dn
+      groupNameAttributes: [ cn ]
+      groupMembershipAttributes: [ member ]
+      usersQuery:
+          baseDN: "ou=people,dc=planetexpress,dc=com"
+          scope: sub
+          derefAliases: never
+          pageSize: 0
+      userUIDAttribute: dn
+      userNameAttributes: [ uid ]
+      tolerateMemberNotFoundErrors: true 
+      tolerateMemberOutOfScopeErrors: true 
+----
+
+[source%nowrap,bash]
+----
+oc create -f ldap_sync_cm.yaml
+----
+
+Add the Cron Job
+
+[source%nowrap,bash]
+----
+vi ldap_sync_cj.yaml
+----
+
+[source%nowrap,bash]
+----
+kind: CronJob
+apiVersion: batch/v1beta1
+metadata:
+  name: ldap-group-syncer
+  namespace: openshift-authentication
+  labels:
+    app: cronjob-ldap-group-sync
+spec:
+  schedule: '*/2 * * * *'
+  concurrencyPolicy: Forbid
+  suspend: false
+  jobTemplate:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: cronjob-ldap-group-sync
+    spec:
+      backoffLimit: 0
+      template:
+        metadata:
+          creationTimestamp: null
+          labels:
+            app: cronjob-ldap-group-sync
+        spec:
+          restartPolicy: Never
+          activeDeadlineSeconds: 500
+          serviceAccountName: ldap-group-syncer
+          schedulerName: default-scheduler
+          terminationGracePeriodSeconds: 30
+          securityContext: {}
+          containers:
+            - name: ldap-group-sync
+              image: 'openshift/origin-cli:latest'
+              command:
+                - /bin/bash
+                - '-c'
+                - >-
+                  oc adm groups sync
+                  --sync-config=/etc/config/ldap-group-sync.yaml --confirm
+              resources: {}
+              volumeMounts:
+                - name: ldap-sync-volume
+                  mountPath: /etc/config
+                - name: ldap-sync-bind-password
+                  mountPath: /etc/secrets
+              terminationMessagePath: /dev/termination-log
+              terminationMessagePolicy: File
+              imagePullPolicy: Always
+          serviceAccount: ldap-group-syncer
+          volumes:
+            - name: ldap-sync-volume
+              configMap:
+                name: ldap-group-syncer
+                defaultMode: 420
+            - name: ldap-sync-bind-password
+              secret:
+                secretName: ldap-sync-bind-password
+                defaultMode: 420
+          dnsPolicy: ClusterFirst
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 5
+----
+
+[source%nowrap,bash]
+----
+oc create -f ldap_sync_cj.yaml
+----
+
+You can now pick out the key lines in this file to make sense of how it ties together, and it uses the service account created:
+
+[source%nowrap,bash]
+----
+serviceAccountName: ldap-group-syncer
+----
+
+Mounts a volume for the `ldap-group-sync.yaml` file:
+
+[source%nowrap,bash]
+----
+--sync-config=/etc/config/ldap-group-sync.yaml --confirm
+----
+
+And mounts password as a file:
+
+[source%nowrap,bash]
+----
+    bindPassword:
+      file: "/etc/secrets/bindPassword"
+----
+
+Study the `volumeMounts`, `volumes` and the `command`, it should be clear how all the components fit together.
+
+The first schedule run will kick in after the designated time, in this case, two minutes, and takes a little longer to complete the run because it has to pull the image `openshift/origin-cli:latest`. Subsequent runs will be much quicker.
+
+====== Testing
+
+Test the schedule by deleting one of the groups *User Management -> Groups*, wait for the Cron Job to run, and the group should get successfully recreated. Monitor the events to following the status.
+
+[source%nowrap,bash]
+----
+oc project openshift-authentication
+oc get events --watch
+----
+
+List the cronjob
+
+[source%nowrap,bash]
+----
+oc get cronjobs.batch
+----
+
+Trigger a job run:
+
+[source%nowrap,bash]
+----
+oc create job --from=cronjob/ldap-group-syncer test-sync-1
+----
+
+====== RBAC
+
+Bind, for example, the `cluster-admin` OpenShift role to the `admin_staff` group:
+
+[source%nowrap,bash]
+----
+oc adm policy add-cluster-role-to-group cluster-admin admin_staff
+----
+
+And for example `basic-user` to the `ship_crew` group:
+
+[source%nowrap,bash]
+----
+oc adm policy add-cluster-role-to-group basic-user ship_crew
+----
+
+Logging into OpenShift with different accounts to test out the results.
+
+For example, cluster administrators:
+
+[source]
+----
+hermes/hermes
+professor/professor
+----
+
+And basic users:
+
+[source]
+----
+fry/fry
+leela/leela
+----
+
+Make sure the LDAP Identity provider is configured to include both groups for basic users:
+
+[source]
+----
+ldap://ldap.cluster.lab.com/DC=planetexpress,DC=com?uid?sub??(|(memberOf=cn=admin_staff,ou=people,dc=planetexpress,dc=com)(memberOf=cn=ship_crew,ou=people,dc=planetexpress,dc=com))
+----
 
 // This is a comment and won't be rendered.
