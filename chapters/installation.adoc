@@ -209,7 +209,7 @@ wget http://192.168.0.101:8080/bootstrap.ign
 
 Using either using Virtual machine manager to create a KVM VM or VirtualBox, create a Virtual Machine with 4 cores, 16GB RAM (16384) and 120GB of storage. This VM will is destroyed after the cluster installation is complete.
 
-Using the `rhcos-metal.x86_64.raw.gz` boot the VM up, until you arrive at a command prompt:
+Using the `rhcos-installer.x86_64.iso` boot the VM up, until you arrive at a command prompt:
 
 [source]
 ----
