@@ -1,4 +1,6 @@
-=== ETCD ENCRYPTION
+=== ETCD 
+
+==== Encryption
 
 [source%nowrap,bash]
 ----
@@ -24,6 +26,424 @@ Check status.progress of Kubernetes API:
 [source%nowrap,bash]
 ----
 oc get kubeapiserver -o=jsonpath='{range .items[0].status.conditions[?(@.type=="Encrypted")]}{.reason}{"\n"}{.message}{"\n"}'
+----
+
+==== Backups
+
+Change project:
+
+[source%nowrap,bash]
+----
+oc project openshift-config
+----
+
+Create Service Account:
+
+[source%nowrap,bash]
+----
+oc create sa approver
+----
+
+Make service account `cluster-admin`:
+
+[source%nowrap,bash]
+----
+oc adm policy add-role-to-user cluster-admin system:serviceaccount:approver
+----
+
+Add service account to scc "privileged":
+
+[source%nowrap,bash]
+----
+oc edit scc privileged
+----
+
+Example, under `users`:
+
+----
+users:
+- system:admin
+- system:serviceaccount:openshift-infra:build-controller
+- system:serviceaccount:approver
+----
+
+Provision an NFS share for backups Ref. https://www.richardwalker.dev/pragmatic-openshift/#_nfs_server
+
+Example for `/etc/exports` on NFS server:
+
+[source%nowrap,bash]
+----
+/mnt/openshift/backups          192.168.0.1/24(rw,sync,no_wdelay,no_root_squash,insecure)
+----
+
+Create directory on NFS server:
+
+[source%nowrap,bash]
+----
+mkdir /mnt/openshift/backups
+chmod 775 /mnt/openshift/backups
+----
+
+Create a PV using nfs storage class for backups:
+
+[source%nowrap,bash]
+----
+vi backups-pv.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: backups-pv
+spec:
+  capacity:
+    storage: 50Gi
+  accessModes:
+  - ReadWriteMany
+  nfs:
+    path: /mnt/openshift/backups
+    server: 192.168.0.15
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: nfs
+----
+
+[source%nowrap,bash]
+----
+oc create -f backups-pv.yaml
+----
+
+[source%nowrap,bash]
+----
+oc get pv
+----
+
+Create a PVC for backups:
+
+[source%nowrap,bash]
+----
+vi backup-nfs-pvc.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: etcd-backup
+  namespace: openshift-config
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 50Gi
+  storageClassName: nfs
+  mountOptions:
+    - nfsvers=4.2
+----
+
+[source%nowrap,bash]
+----
+oc create -f backup-nfs-pvc.yaml
+----
+
+[source%nowrap,bash]
+----
+oc get pvc
+----
+
+Create a ConfigMap containing `cluster-backup.sh`.
+
+NOTE: At the end of this script is a modification, On each master node the `cluster-backup.sh` is unique, containing a hardcoded reference to its own hosts IP Address, so this is tweaked to obtain the IP address.
+
+Take notice of the following line:
+
+[source%nowrap,bash]
+----
+IP_ADDR=$(hostname -i)
+----
+[source%nowrap,bash]
+----
+ETCDCTL_ENDPOINTS="https://${IP_ADDR}:2379" etcdctl snapshot save "${SNAPSHOT_FILE}"
+Add the config map continer customised cluster-backup.sh script:s
+----
+
+Create the `ConfigMap`:
+
+[source%nowrap,bash]
+----
+vi backup-configmap.yaml
+----
+
+[source%nowrap,bash]
+----
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: etcd-backup-script
+  namespace: openshift-config
+data:
+  etcd-backup.sh: |
+    #!/usr/bin/env bash
+
+    ### Created by cluster-etcd-operator. DO NOT edit.
+
+    set -o errexit
+    set -o pipefail
+    set -o errtrace
+
+    # example
+    # cluster-backup.sh $path-to-snapshot
+
+    if [[ $EUID -ne 0 ]]; then
+      echo "This script must be run as root"
+      exit 1
+    fi
+
+    function usage {
+      echo 'Path to backup dir required: ./cluster-backup.sh <path-to-backup-dir>'
+      exit 1
+    }
+
+    # If the first argument is missing, or it is an existing file, then print usage and exit
+    if [ -z "$1" ] || [ -f "$1" ]; then
+      usage
+    fi
+
+    if [ ! -d "$1" ]; then
+      mkdir -p "$1"
+    fi
+
+    # backup latest static pod resources
+    function backup_latest_kube_static_resources {
+      RESOURCES=("$@")
+
+      LATEST_RESOURCE_DIRS=()
+      for RESOURCE in "${RESOURCES[@]}"; do
+        # shellcheck disable=SC2012
+        LATEST_RESOURCE=$(ls -trd "${CONFIG_FILE_DIR}"/static-pod-resources/"${RESOURCE}"-[0-9]* | tail -1) || true
+        if [ -z "$LATEST_RESOURCE" ]; then
+          echo "error finding static-pod-resource ${RESOURCE}"
+          exit 1
+        fi
+
+        echo "found latest ${RESOURCE}: ${LATEST_RESOURCE}"
+        LATEST_RESOURCE_DIRS+=("${LATEST_RESOURCE#${CONFIG_FILE_DIR}/}")
+      done
+
+      # tar latest resources with the path relative to CONFIG_FILE_DIR
+      tar -cpzf "$BACKUP_TAR_FILE" -C "${CONFIG_FILE_DIR}" "${LATEST_RESOURCE_DIRS[@]}"
+      chmod 600 "$BACKUP_TAR_FILE"
+    }
+
+    function source_required_dependency {
+      local path="$1"
+      if [ ! -f "${path}" ]; then
+        echo "required dependencies not found, please ensure this script is run on a node with a functional etcd static pod"
+        exit 1
+      fi
+      # shellcheck disable=SC1090
+      source "${path}"
+    }
+
+    BACKUP_DIR="$1"
+    DATESTRING=$(date "+%F_%H%M%S")
+    BACKUP_TAR_FILE=${BACKUP_DIR}/static_kuberesources_${DATESTRING}.tar.gz
+    SNAPSHOT_FILE="${BACKUP_DIR}/snapshot_${DATESTRING}.db"
+    BACKUP_RESOURCE_LIST=("kube-apiserver-pod" "kube-controller-manager-pod" "kube-scheduler-pod" "etcd-pod")
+
+    trap 'rm -f ${BACKUP_TAR_FILE} ${SNAPSHOT_FILE}' ERR
+
+    source_required_dependency /etc/kubernetes/static-pod-resources/etcd-certs/configmaps/etcd-scripts/etcd.env
+    source_required_dependency /etc/kubernetes/static-pod-resources/etcd-certs/configmaps/etcd-scripts/etcd-common-tools
+
+    # TODO handle properly
+    if [ ! -f "$ETCDCTL_CACERT" ] && [ ! -d "${CONFIG_FILE_DIR}/static-pod-certs" ]; then
+      ln -s "${CONFIG_FILE_DIR}"/static-pod-resources/etcd-certs "${CONFIG_FILE_DIR}"/static-pod-certs
+    fi
+
+    IP_ADDR=$(hostname -i)
+
+    #dl_etcdctl
+    backup_latest_kube_static_resources "${BACKUP_RESOURCE_LIST[@]}"
+    ETCDCTL_ENDPOINTS="https://${IP_ADDR}:2379" etcdctl snapshot save "${SNAPSHOT_FILE}"
+    echo "snapshot db and kube resources are successfully saved to ${BACKUP_DIR}"
+----
+
+[source%nowrap,bash]
+----
+oc create -f backup-configmap.yaml
+----
+
+Before creating the cronjob, SSH to master node and create a directory `/mnt/backup` on master node/s:
+
+[source%nowrap,bash]
+----
+ssh -i cluster_id_rsa core@192.168.0.111
+sudo su -
+mkdir /mnt/backup
+----
+
+SSH to a master node and get the correct `quay.io/openshift-release-dev/ocp-v4.0-art-dev` image from master in file `/etc/kubernetes/manifests/etcd-pod.yaml`
+
+[source%nowrap,bash]
+----
+ssh -i cluster_id_rsa core@192.168.0.111
+sudo su -
+cat /etc/kubernetes/manifests/etcd-pod.yaml | grep quay.io/openshift-release-dev/ocp-v4.0-art-dev
+----
+
+Example:
+
+[source%nowrap,bash]
+----
+spec:
+  initContainers:
+    - name: etcd-ensure-env-vars
+      image: quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:326516b79a528dc627e5a5d84c986fd35e5f8ff5cbd74ff0ef802473efccd285
+----
+
+Adjust the schedule as needed, use the right image as found in previous step and assuming you have created the `/mnt/backup` directory on each master node:
+
+[source%nowrap,bash]
+----
+vi backup-cronjob.yaml
+----
+
+[source%nowrap,bash]
+----
+kind: CronJob
+apiVersion: batch/v1beta1
+metadata:
+  name: cronjob-etcd-backup                                             
+  namespace: openshift-config
+  labels:
+    purpose: etcd-backup
+spec:
+  schedule: "10 10 * * *"
+  startingDeadlineSeconds: 200
+  concurrencyPolicy: Forbid
+  suspend: false
+  jobTemplate:
+    spec:
+      backoffLimit: 0
+      template:
+        spec:
+          nodeSelector:
+            node-role.kubernetes.io/master: ''
+          restartPolicy: Never
+          activeDeadlineSeconds: 200
+          serviceAccountName: approver                                       
+          hostNetwork: true
+          containers:
+            - resources:
+                requests:
+                  cpu: 300m
+                  memory: 250Mi
+              terminationMessagePath: /dev/termination-log
+              name: etcd-backup
+              command:
+                - /bin/sh
+                - '-c'
+                - >-
+                  /usr/local/bin/etcd-backup.sh /mnt/backup
+              securityContext:
+                privileged: true
+              imagePullPolicy: IfNotPresent
+              volumeMounts:
+                - name: certs
+                  mountPath: /etc/ssl/etcd/
+                - name: conf
+                  mountPath: /etc/etcd/
+                - name: kubeconfig
+                  mountPath: /etc/kubernetes/
+                - name: etcd-backup-script
+                  mountPath: /usr/local/bin/etcd-backup.sh
+                  subPath: etcd-backup.sh
+                - name: etcd-backup
+                  mountPath: /mnt/backup
+                - name: scripts
+                  mountPath: /usr/local/bin
+              terminationMessagePolicy: FallbackToLogsOnError
+              image: >-                                                     
+                quay.io/openshift-release-dev/ocp-v4.0-art-dev@sha256:c9487f25868eafe55b72932010afa4b2728955a3a326b4823a56b185dd10ec50
+          serviceAccount: approver                                           
+          tolerations:                                                       
+            - operator: Exists
+              effect: NoSchedule
+            - operator: Exists
+              effect: NoExecute            
+          volumes:                                                        
+            - name: certs
+              hostPath:
+                path: /etc/kubernetes/static-pod-resources/etcd-member
+                type: ''
+            - name: conf
+              hostPath:
+                path: /etc/etcd
+                type: ''
+            - name: kubeconfig
+              hostPath:
+                path: /etc/kubernetes
+                type: ''
+            - name: scripts
+              hostPath:
+                path: /usr/local/bin
+                type: ''
+            - name: etcd-backup
+              persistentVolumeClaim:
+                claimName: etcd-backup
+            - name: etcd-backup-script
+              configMap:
+                name: etcd-backup-script
+                defaultMode: 493
+----
+
+[source%nowrap,bash]
+----
+oc create -f backup-cronjob.yaml
+----
+
+List the cronjob:
+
+[source%nowrap,bash]
+----
+oc get cronjobs.batch
+----
+
+Run the cronjob on-demand:
+
+[source%nowrap,bash]
+----
+oc create job --from=cronjob/cronjob-etcd-backup test-backup-001
+----
+
+The PVC should now be claimed:
+
+[source%nowrap,bash]
+----
+oc get pvc
+----
+
+[source%nowrap,bash]
+----
+NAME          STATUS   VOLUME       CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+etcd-backup   Bound    backups-pv   50Gi       RWX            nfs            14m
+----
+
+The job should run and the backup create in the file share, on the NFS server (or mount the NFS share):
+
+[source%nowrap,bash]
+----
+cd /mnt/openshift/backups/
+----
+
+[source%nowrap,bash]
+----
+-rw-------. 1 root root 140324896 Nov 27 11:18 snapshot_2020-11-28_111840.db
+-rw-------. 1 root root     70093 Nov 27 11:18 static_kuberesources_2020-11-28_111840.tar.gz
 ----
 
 // This is a comment and won't be rendered.

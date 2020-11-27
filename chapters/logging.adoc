@@ -1,4 +1,4 @@
-=== CLUSTER LOGGING
+=== LOGGING
 
 OpenShift comes with its native logging stack using Elasticsearch, Fluentd, and Kibana (EFK). It can be very resource-intensive, in a production environment dedicate resource plentiful "infra" nodes to run Elasticsearch and use decent block storage.
 
@@ -105,7 +105,7 @@ Fluentd runs an instance on every node in the cluster.
 
 ==== Local storage logging
 
-Assuming the PVs are available with a storage class of `local-sc` as described in the #_local_storage_operator section of this document. The following logging instance includes the storage class definition. Both the `storageClassName` and `size` are added:
+Assuming the PVs are available with a storage class of `local-sc` as described in the https://www.richardwalker.dev/pragmatic-openshift/#_local_storage section of this document. The following logging instance includes the storage class definition. Both the `storageClassName` and `size` are added:
 
 [source%nowrap,bash]
 ----
@@ -172,6 +172,537 @@ elasticsearch-elasticsearch-cdm-lk4f9958-1   Bound    local-pv-d4d267e6   50Gi  
 elasticsearch-elasticsearch-cdm-lk4f9958-2   Bound    local-pv-297ca047   50Gi       RWO            local-sc       22s
 elasticsearch-elasticsearch-cdm-lk4f9958-3   Bound    local-pv-6317e505   50Gi       RWO            local-sc       22s
 ----
+
+==== Log Forwarding
+
+To test log forwarding in a lab environment, external services need deploying and configuring to receive them. 
+
+===== Elasticsearch
+
+====== Deploy External EFK 
+
+Create a Virtual Machine, this example uses 4 CPU cores, 8GB of memory and 60GB storage with bridge networking so the IP Address of the EFK VM is on the same network as my OpenShift 4.6 home lab.
+
+Assuming CentOS 8.2 is installed on the VM, make sure all is up-to-date:
+
+[source%nowrap,bash]
+----
+dnf update -y
+reboot
+----
+
+Install Java:
+
+[source%nowrap,bash]
+----
+dnf install java-11-openjdk-devel -y
+----
+
+Add EPEL:
+
+[source%nowrap,bash]
+----
+dnf install epel-release -y
+----
+
+Reducing steps in this document and to remove potential issues, disabling both SELinux and `firewalld`:
+
+[source%nowrap,bash]
+----
+vi /etc/sysconfig/selinux
+----
+
+[source%nowrap,bash]
+----
+SELINUX=disabled
+----
+
+[source%nowrap,bash]
+----
+systemctl stop firewalld
+systemctl disable firewalld
+----
+
+*Elasticsearch*
+
+Add the Elasticsearch repository:
+
+[source%nowrap,bash]
+----
+vi /etc/yum.repos.d/elasticsearch.repo
+----
+
+[source%nowrap,bash]
+----
+[elasticsearch-7.x]
+name=Elasticsearch repository for 7.x packages
+baseurl=https://artifacts.elastic.co/packages/7.x/yum
+gpgcheck=1
+gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+enabled=1
+autorefresh=1
+type=rpm-md
+----
+
+Import the key:
+
+[source%nowrap,bash]
+----
+rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch
+----
+
+Install Eleasticsearch:
+
+[source%nowrap,bash]
+----
+dnf install elasticsearch -y
+----
+
+Back up the original configuration:
+
+[source%nowrap,bash]
+----
+cp /etc/elasticsearch/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml.original
+----
+
+Strip out the noise:
+
+[source%nowrap,bash]
+----
+grep -v -e '^#' -e '^$' /etc/elasticsearch/elasticsearch.yml.original > /etc/elasticsearch/elasticsearch.yml
+----
+
+Add the following settings to expose Elasticsearch to the network:
+
+[source%nowrap,bash]
+----
+cluster.name: my-efk
+path.data: /var/lib/elasticsearch
+path.logs: /var/log/elasticsearch
+transport.host: localhost
+transport.tcp.port: 9300
+http.port: 9200
+network.host: 0.0.0.0
+cluster.initial_master_nodes: node-1
+----
+
+Start and enable the service:
+
+[source%nowrap,bash]
+----
+systemctl enable elasticsearch.service --now
+----
+
+*Kibana*
+
+Install Kibana:
+
+[source%nowrap,bash]
+----
+dnf install kibana -y
+----
+
+Back up the original configuration:
+
+[source%nowrap,bash]
+----
+cp /etc/kibana/kibana.yml /etc/kibana/kibana.yml.original
+----
+
+Update the configuration for the Elasticsearch host:
+
+[source%nowrap,bash]
+----
+vi /etc/kibana/kibana.yml
+----
+----
+elasticsearch.hosts: [“http://localhost:9200"]
+----
+
+Start and enable Kibana:
+
+[source%nowrap,bash]
+----
+systemctl enable kibana.service --now
+----
+
+*NGINX*
+
+Install NGINX:
+
+[source%nowrap,bash]
+----
+dnf install nginx -y
+----
+
+Create a user name and password for Kibana:
+
+[source%nowrap,bash]
+----
+echo "kibana:`openssl passwd -apr1`" | tee -a /etc/nginx/htpasswd.kibana
+----
+
+Back up the original configuration:
+
+[source%nowrap,bash]
+----
+cp /etc/kibana/kibana.yml /etc/kibana/kibana.yml.original
+----
+
+Add the following configuration:
+
+[source%nowrap,bash]
+----
+vi /etc/kibana/kibana.yml 
+----
+
+[source%nowrap,bash]
+----
+user nginx;
+worker_processes auto;
+error_log /var/log/nginx/error.log;
+pid /run/nginx.pid;
+include /usr/share/nginx/modules/*.conf;
+events {
+    worker_connections 1024;
+}
+http {
+    log_format main '$remote_addr — $remote_user [$time_local] "$request"'
+    '$status $body_bytes_sent "$http_referer"'
+    '"$http_user_agent" "$http_x_forwarded_for"';
+    access_log /var/log/nginx/access.log main;
+    sendfile on;
+    tcp_nopush on;
+    tcp_nodelay on;
+    keepalive_timeout 65;
+    types_hash_max_size 2048;
+    include /etc/nginx/mime.types;
+    default_type application/octet-stream;
+    include /etc/nginx/conf.d/*.conf;
+    server {
+        listen 80;
+        server_name _;
+        auth_basic "Restricted Access";
+        auth_basic_user_file /etc/nginx/htpasswd.kibana;
+    location / {
+        proxy_pass http://localhost:5601;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection ‘upgrade’;
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+        }
+    }
+}
+----
+
+Start and enable NGINX:
+
+[source%nowrap,bash]
+----
+systemctl enable nginx.service --now
+----
+
+====== Smoke testing
+
+With all that in place, test Elasticsearch is up and running, the following should return a JSON response:
+
+[source%nowrap,bash]
+----
+curl http://127.0.0.1:9200/_cluster/health?pretty
+----
+
+You should be able access Kibana via a browser at the IP Address of your instance, in my case http://192.168.0.70
+
+Once in there, navigate to *"Management" -> "Stack Management", Under "Kibana" -> "Index Patterns"* and click *"Create Index Pattern"*. This is where you will see various sources to index.
+
+From a command line PUT an example data:
+
+[source%nowrap,bash]
+----
+curl -X PUT "192.168.0.70:9200/characters/_doc/1?pretty" -H 'Content-Type: application/json' -d '{"name": "Mickey Mouse"}
+curl -X PUT "192.168.0.70:9200/characters/_doc/2?pretty" -H 'Content-Type: application/json' -d '{"name": "Daffy Duck"}
+curl -X PUT "192.168.0.70:9200/characters/_doc/3?pretty" -H 'Content-Type: application/json' -d '{"name": "Donald Duck"}
+curl -X PUT "192.168.0.70:9200/characters/_doc/4?pretty" -H 'Content-Type: application/json' -d '{"name": "Bugs Bunny"}
+----
+
+In Kibana, when you go to *"Create Index Pattern"* as described before, you should now see `characters` has appeared, type `characters*` and click *"Next step"* and create the index pattern. Navigate to *"Kibana" -> "Discover"* and if you have more than one *"Index Pattern"* select the `characters*` index from the drop-down menu (near top left) and you should see the data you PUT into Elasticsearch.
+
+This pattern is what I use to see and add indexes to Kibana when adding forwarders.
+
+For reference you can return individual results using:
+
+[source%nowrap,bash]
+----
+curl -X GET "localhost:9200/characters/_doc/1?pretty"
+----
+
+====== Forwarding
+
+Example of OCP 4.6 log forwarding of application logs to an external Elasticsearch stack:
+
+[source%nowrap,bash]
+----
+vi log-forwarding.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: "logging.openshift.io/v1"
+kind: ClusterLogForwarder
+metadata:
+  name: instance 
+  namespace: openshift-logging 
+spec:
+  outputs:
+   - name: elasticsearch-insecure 
+     type: "elasticsearch" 
+     url: http://192.168.0.70:9200 
+  pipelines:
+   - name: application-logs 
+     inputRefs: 
+     - application
+     outputRefs:
+     - elasticsearch-insecure 
+     labels:
+       logs: application 
+----
+
+[source%nowrap,bash]
+----
+oc create -f log-forwarding.yaml
+----
+
+[source%nowrap,bash]
+----
+oc project openshift-logging
+oc get pods
+----
+
+===== Rsyslog
+
+====== Rsyslog receiver
+
+To test rsyslog forwarding, configure rsyslog on a RHEL/CentOS 8 host. In this example, *UDP* with a DNS name of `syslog.cluster.lab.com`.
+
+Rsyslog should already be enabled and running:
+
+[source%nowrap,bash]
+----
+systemctl status rsyslog
+----
+
+[source%nowrap,bash]
+----
+vi /etc/rsyslog.conf
+----
+
+Uncomment the lines:
+
+[source%nowrap,bash]
+----
+module(load="imudp") 
+input(type="imudp" port="514")
+----
+
+Add a rule for *local0*, something like:
+
+[source%nowrap,bash]
+----
+local0.*                       /var/log/openshift.log
+----
+
+Either stop and disable `firewalld` or add the follwoing rule:
+
+[source%nowrap,bash]
+----
+firewall-cmd  --add-port=514/udp  --zone=public  --permanent
+firewall-cmd --reload
+----
+
+Restart rsyslog:
+
+[source%nowrap,bash]
+----
+systemctl restart rsyslog
+----
+
+*Test the receiving* 
+
+From any other Linux host, configure rsyslog to forward UDP:
+
+[source%nowrap,bash]
+----
+vi /etc/rsyslog.conf
+----
+
+[source%nowrap,bash]
+----
+*.* @syslog.cluster.lab.com:514     # Use @ for UDP protocol
+----
+
+[source%nowrap,bash]
+----
+systemctl restart rsyslog
+----
+
+Send a test message:
+
+[source%nowrap,bash]
+----
+logger -p local0.notice "Hello, this is test!"
+----
+
+====== Forwarding
+
+Here is an example of creating a syslog forwarder for just a single project:
+
+[source%nowrap,bash]
+----
+vi rsyslog-forwarder.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: "logging.openshift.io/v1"
+kind: ClusterLogForwarder
+metadata:
+  name: instance
+  namespace: openshift-logging
+spec:
+  inputs:
+    - application:
+        namespaces:
+          - my-project
+      name: django-logger-logs
+  outputs:
+    - name: rsyslog-test
+      syslog:
+        appName: cluster-apps
+        facility: local0
+        msgID: cluster-id
+        procID: cluster-proc
+        rfc: RFC5424
+        severity: debug
+      type: syslog
+      url: 'udp://192.168.0.145:514'
+  pipelines:
+    - inputRefs:
+        - django-logger-logs
+      labels:
+        syslog: rsyslog-test
+      name: syslog-test
+      outputRefs:
+        - rsyslog-test
+----
+
+[source%nowrap,bash]
+----
+oc create -f rsyslog-forwarder.yaml
+----
+
+==== Testing app
+
+The following application was written to trigger event in log files for testing:
+
+Create a new project:
+
+[source%nowrap,bash]
+----
+oc new-project logging-project
+----
+
+Import my s2i-python38-container image:
+
+[source%nowrap,bash]
+----
+oc import-image django-s2i-base-img --from quay.io/richardwalkerdev/s2i-python38-container --confirm
+----
+
+Deploy the application:
+
+[source%nowrap,bash]
+----
+oc new-app --name django-logger django-s2i-base-img~https://github.com/richardwalkerdev/django-logger.git
+----
+
+And expose the route:
+
+[source%nowrap,bash]
+----
+oc expose service/django-logger
+----
+
+===== Forwarding
+
+With the testing application deployed the following example combines forwarding to the external Elasticsearch (v7) and Rsyslog. This example also includes "forwarding" to the EFK stack (v6) deployed on OpenShift by specifying `default` in the `outputRefs`. Moreover, the forwarding is limited to just the `logging-project` project/namespace.
+
+[source%nowrap,bash]
+----
+vi log-forwarding.yaml
+----
+
+[source%nowrap,bash]
+----
+apiVersion: "logging.openshift.io/v1"
+kind: ClusterLogForwarder
+metadata:
+  name: instance
+  namespace: openshift-logging
+spec:
+  inputs:
+    - application:
+        namespaces:
+          - logging-project
+      name: project-logs
+  outputs:
+    - name: elasticsearch-insecure
+      type: elasticsearch
+      url: 'http://192.168.0.70:9200'
+    - name: rsyslog-insecure
+      syslog:
+        appName: cluster-apps
+        facility: local0
+        msgID: cluster-id
+        procID: cluster-proc
+        rfc: RFC5424
+        severity: debug
+      type: syslog
+      url: 'udp://192.168.0.145:514'
+  pipelines:
+    - inputRefs:
+        - project-logs
+      labels:
+        logs: application
+      name: application-logs
+      outputRefs:
+        - elasticsearch-insecure
+        - rsyslog-insecure
+        - default
+----
+
+[source%nowrap,bash]
+----
+oc create -f log-forwarding.yaml
+----
+
+Going to the application, for example: http://django-logger-logging-project.apps.cluster.lab.com/ 
+
+image::images/logger.png[Logger app]
+
+Generate some logs by clicking the buttons. 
+
+Example from OCP EFK - Kibana v6:
+
+image::images/kibanav6.png[Kibana V6]
+
+Example from External - Kibana v7:
+
+image::images/kibanav7.png[Kibana V7]
+
+Example of rsyslog:
+
+image::images/rsyslog.png[Rsyslog]
 
 ==== Troubleshooting
 
