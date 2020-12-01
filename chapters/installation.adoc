@@ -1,6 +1,6 @@
 === INSTALLATION
 
-At the time of writing the latest version is 4.6.4. The downloads necessary are publicly available however download a legitimate pull secret from the Red Hat cluster portal. Vising https://cloud.redhat.com/openshift/install/metal/user-provisioned for the latest versions and obtaining your pull secret. 
+At the time of writing the latest version is 4.6.4. The downloads necessary are publicly available however download a legitimate pull secret from the Red Hat cluster portal. Vising https://cloud.redhat.com/openshift/install/metal/user-provisioned for the latest versions and obtaining your pull secret.
 
 ==== Client tools
 
@@ -98,28 +98,28 @@ vi install-config.yaml.orig
 [source]
 ----
 apiVersion: v1
-baseDomain: lab.com 
+baseDomain: lab.com
 compute:
-- hyperthreading: Enabled   
+- hyperthreading: Enabled
   name: worker
-  replicas: 0 
+  replicas: 0
 controlPlane:
-  hyperthreading: Enabled   
-  name: master 
-  replicas: 3 
+  hyperthreading: Enabled
+  name: master
+  replicas: 3
 metadata:
-  name: cluster 
+  name: cluster
 networking:
   clusterNetwork:
-  - cidr: 10.128.0.0/14 
-    hostPrefix: 23 
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
   networkType: OpenShiftSDN
-  serviceNetwork: 
+  serviceNetwork:
   - 172.30.0.0/16
 platform:
-  none: {} 
-fips: false 
-pullSecret: '{"auths": ...}' 
+  none: {}
+fips: false
+pullSecret: '{"auths": ...}'
 sshKey: 'ssh-ed25519 AAAA...'
 ----
 
@@ -253,7 +253,7 @@ Start the CoreOS installer, providing the `bootstrap.ign` ignition file:
 
 [source]
 ----
-sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/bootstrap.ign /dev/sda --insecure-ignition --copy-network 
+sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/bootstrap.ign /dev/sda --insecure-ignition --copy-network
 ----
 
 Reboot the VM with `reboot`, make sure the VM boots from the hard disk storage (eject the ISO before it boots) or `shutdown` the VM and remove the CD-ROM from the boot order.
@@ -286,13 +286,13 @@ The following pods should eventually be up and running:
 ----
 sudo crictl pods
 
-...Ready               bootstrap-kube-scheduler-bootstrap.cluster.lab.com...            
-...Ready               bootstrap-kube-controller-manager-bootstrap.cluster.lab.com...   
-...Ready               bootstrap-kube-apiserver-bootstrap.cluster.lab.com...            
-...Ready               cloud-credential-operator-bootstrap.cluster.lab.com...            
-...Ready               bootstrap-cluster-version-operator-bootstrap.cluster.lab.com...   
-...Ready               bootstrap-machine-config-operator-bootstrap.cluster.lab.com...    
-...Ready               etcd-bootstrap-member-bootstrap.cluster.lab.com...               
+...Ready               bootstrap-kube-scheduler-bootstrap.cluster.lab.com...
+...Ready               bootstrap-kube-controller-manager-bootstrap.cluster.lab.com...
+...Ready               bootstrap-kube-apiserver-bootstrap.cluster.lab.com...
+...Ready               cloud-credential-operator-bootstrap.cluster.lab.com...
+...Ready               bootstrap-cluster-version-operator-bootstrap.cluster.lab.com...
+...Ready               bootstrap-machine-config-operator-bootstrap.cluster.lab.com...
+...Ready               etcd-bootstrap-member-bootstrap.cluster.lab.com...
 ----
 
 List the running containers and tail the logs of any one:
@@ -315,7 +315,7 @@ Export the `kubeconfig` and test getting cluster operators with `oc get co`:
 
 [source]
 ----
-export KUBECONFIG=cluster/auth/kubeconfig 
+export KUBECONFIG=cluster/auth/kubeconfig
 oc get co
 ----
 
@@ -324,14 +324,14 @@ You'll only see the `cloud-credential` operator is available at this stage:
 [source]
 ----
 NAME                        VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
-authentication                                                                            
+authentication
 cloud-credential            True        False         False      26m
-cluster-autoscaler                                                               
-config-operator                                                                           
-console                                                                                   
-csi-snapshot-controller                                                                   
-dns                                                                                       
-etcd                       
+cluster-autoscaler
+config-operator
+console
+csi-snapshot-controller
+dns
+etcd
 ...
 ----
 
@@ -348,12 +348,12 @@ openshift-install --dir=cluster wait-for bootstrap-complete
 
 [source]
 ----
-INFO Waiting up to 20m0s for the Kubernetes API at https://api.cluster.lab.com:6443... 
-INFO API v1.19.0+9f84db3 up                       
-INFO Waiting up to 30m0s for bootstrapping to complete... 
+INFO Waiting up to 20m0s for the Kubernetes API at https://api.cluster.lab.com:6443...
+INFO API v1.19.0+9f84db3 up
+INFO Waiting up to 30m0s for bootstrapping to complete...
 ----
 
-The bootstrapping process will not complete until all three master nodes have been provisioned. 
+The bootstrapping process will not complete until all three master nodes have been provisioned.
 
 ==== Master nodes
 
@@ -380,7 +380,7 @@ Write the image to the device:
 sudo dd if=rhcos-installer.x86_64.iso of=/dev/sda status=progress; sync
 ----
 
-The next steps repeat the process of booting the three physical nodes using the Red Hat CoreOS ISO. Make sure to use `master.ign`, and the right IP Address and hostname for each master node. In the case of an Intel NUC, `F10` is used to interrupt the host BIOS and select a boot device. 
+The next steps repeat the process of booting the three physical nodes using the Red Hat CoreOS ISO. Make sure to use `master.ign`, and the right IP Address and hostname for each master node. In the case of an Intel NUC, `F10` is used to interrupt the host BIOS and select a boot device.
 
 ===== master1.cluster.lab.com
 
@@ -426,7 +426,7 @@ Start the CoreOS installer, providing the `master.ign` ignition file:
 
 [source%nowrap]
 ----
-sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition --copy-network 
+sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition --copy-network
 ----
 
 Reboot the VM with `reboot`, make sure the VM boots from the hard disk storage (remove the USB/ISO before it boots) or `shutdown` the VM and remove the CD-ROM from the boot order and power it back on.
@@ -473,7 +473,7 @@ nmcli con up 'Wired Connection'
 
 [source%nowrap]
 ----
-sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition
+sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition --copy-network
 ----
 
 [source%nowrap]
@@ -510,7 +510,7 @@ nmcli con up 'Wired Connection'
 
 [source%nowrap]
 ----
-sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition
+sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition --copy-network
 ----
 
 [source%nowrap]
@@ -532,11 +532,11 @@ nameserver=192.168.0.101
 
 ==== Completion
 
-Once all three master nodes are provisioning the process can take some time to complete. As indicated by the installer INFO "Waiting up to 40m0s for bootstrapping to complete". 
+Once all three master nodes are provisioning the process can take some time to complete. As indicated by the installer INFO "Waiting up to 40m0s for bootstrapping to complete".
 
 The two key things to watch are the load balancers and cluster operators. Once the master node boots up to the login prompt, it will download a bunch of images and do some initial installation, and the host will perform a reboot and come back to the login prompt during this process.
 
-Once all load balancers are showing up, and all cluster operators are "Available" the `openshift-install` should complete and advise removing the bootstrap node. 
+Once all load balancers are showing up, and all cluster operators are "Available" the `openshift-install` should complete and advise removing the bootstrap node.
 
 [source%nowrap,bash]
 ----
@@ -545,11 +545,11 @@ openshift-install --dir=cluster wait-for bootstrap-complete
 
 [source%nowrap,bash]
 ----
-INFO Waiting up to 20m0s for the Kubernetes API at https://api.cluster.lab.com:6443... 
-INFO API v1.19.0+9f84db3 up                       
-INFO Waiting up to 30m0s for bootstrapping to complete... 
-INFO It is now safe to remove the bootstrap resources 
-INFO Time elapsed: 0s                             
+INFO Waiting up to 20m0s for the Kubernetes API at https://api.cluster.lab.com:6443...
+INFO API v1.19.0+9f84db3 up
+INFO Waiting up to 30m0s for bootstrapping to complete...
+INFO It is now safe to remove the bootstrap resources
+INFO Time elapsed: 0s
 ----
 
 Check all nodes are "Ready":
@@ -611,7 +611,7 @@ storage                                    4.6.4     True        False         F
 
 Power off the bootstrap node (and destroy it) and comment out the node in both the `api` and `api-int` load balancers in `/etc/haproxy/haproxy.cfg`.
 
-The load balancers should look like the following screenshots, note that the ingress LB only has two replicas, therefore will show down on one of the nodes. 
+The load balancers should look like the following screenshots, note that the ingress LB only has two replicas, therefore will show down on one of the nodes.
 
 image::images/api-lb.png[API LB]
 image::images/ingress-lb.png[Ingress LB]
@@ -656,7 +656,7 @@ For example, in a browser https://console-openshift-console.apps.cluster.lab.com
 
 ==== Troubleshooting
 
-===== Single master 
+===== Single master
 
 It is possible to deploy a single node "cluster" if defined in the `install-config.yaml`, however the installation never completes, with operators pending. Apply the following patch for the installation to complete with a single master configuration:
 
@@ -705,7 +705,7 @@ sudo update-ca-trust extract
 
 ===== Missing Console
 
-If both the `openshift-samples` and `console` operators were absent during deployment of a cluster. Powering off all three masters and powering them back on brought all the operators up. 
+If both the `openshift-samples` and `console` operators were absent during deployment of a cluster. Powering off all three masters and powering them back on brought all the operators up.
 
 
 // This is a comment and won't be rendered.
