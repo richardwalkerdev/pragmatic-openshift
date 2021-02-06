@@ -4,9 +4,6 @@
 
 ===== S2I
 
-
-
-
 [source%nowrap,bash]
 ----
 podman pull docker.io/rroemhild/test-openldap
@@ -18,8 +15,6 @@ Create a pod:
 ----
 podman pod create -p 389 -p 636 -n ldappod
 ----
-
-
 
 View the local image:
 

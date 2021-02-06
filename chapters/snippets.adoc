@@ -1,5 +1,5 @@
 
-[source]
+[source%nowrap,bash]
 --------------------------------------
 var http = require("http"); // <1>
 var server = http.createServer(); // <2>

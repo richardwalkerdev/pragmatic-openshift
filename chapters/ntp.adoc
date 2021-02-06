@@ -49,7 +49,7 @@ Create a MachineConfig for worker nodes, pasting in the chrony.conf.encoded cont
 vi worker-chrony.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: machineconfiguration.openshift.io/v1
 kind: MachineConfig
@@ -90,7 +90,7 @@ And repeat for master:
 vi master-chrony.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: machineconfiguration.openshift.io/v1
 kind: MachineConfig

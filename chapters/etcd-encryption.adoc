@@ -7,7 +7,7 @@
 oc edit apiserver
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 spec:
   encryption:
@@ -60,6 +60,7 @@ oc edit scc privileged
 
 Example, under `users`:
 
+[source%nowrap,yaml]
 ----
 users:
 - system:admin
@@ -91,7 +92,7 @@ Create a PV using nfs storage class for backups:
 vi backups-pv.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: v1
 kind: PersistentVolume
@@ -126,7 +127,7 @@ Create a PVC for backups:
 vi backup-nfs-pvc.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -177,7 +178,7 @@ Create the `ConfigMap`:
 vi backup-configmap.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 kind: ConfigMap
 apiVersion: v1
@@ -297,7 +298,7 @@ cat /etc/kubernetes/manifests/etcd-pod.yaml | grep quay.io/openshift-release-dev
 
 Example:
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 spec:
   initContainers:
@@ -312,7 +313,7 @@ Adjust the schedule as needed, use the right image as found in previous step and
 vi backup-cronjob.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 kind: CronJob
 apiVersion: batch/v1beta1

@@ -56,7 +56,7 @@ With shares available,  add the alert manager PVs, NOTE: the `accessMode` is set
 vi alert-manager-nfs-pv.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 ---
 apiVersion: v1
@@ -132,7 +132,7 @@ If not, create it:
 vi cluster-monitoring-config.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: v1
 kind: ConfigMap
@@ -163,7 +163,7 @@ This step is easier via the web console, amend *Workloads → Config Maps* (Sele
 
 Add the following:
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 data:
   config.yaml: |+
@@ -227,7 +227,7 @@ Add the prometheus PVs:
 vi prometheus-nfs-pv.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 ---
 apiVersion: v1
@@ -271,7 +271,7 @@ Again via the web console, amend *Workloads → Config Maps* (Select Project `op
 
 And add the following:
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
     prometheusK8s:
       volumeClaimTemplate:
@@ -286,7 +286,7 @@ And add the following:
 
 Note, this is appended so the whole configuration should look like this:
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 data:
   config.yaml: |+
@@ -360,7 +360,7 @@ thanos-querier-66f4b4c758-fsqfz                4/4     Running   0          2d2h
 
 If using infra nodes, add node selectors to the configuration, here is a complete example for OCP 4.6:
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: v1
 kind: ConfigMap

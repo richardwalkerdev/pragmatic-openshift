@@ -36,7 +36,7 @@ Make note of the `resources: limits:`, The following example has reduced memory 
 
 Paste in the following logging instance:
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: "logging.openshift.io/v1"
 kind: "ClusterLogging"
@@ -107,7 +107,7 @@ Fluentd runs an instance on every node in the cluster.
 
 Assuming the PVs are available with a storage class of `local-sc` as described in the https://www.richardwalker.dev/pragmatic-openshift/#_local_storage section of this document. The following logging instance includes the storage class definition. Both the `storageClassName` and `size` are added:
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: "logging.openshift.io/v1"
 kind: "ClusterLogging"
@@ -274,7 +274,7 @@ grep -v -e '^#' -e '^$' /etc/elasticsearch/elasticsearch.yml.original > /etc/ela
 
 Add the following settings to expose Elasticsearch to the network:
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 cluster.name: my-efk
 path.data: /var/lib/elasticsearch
@@ -446,7 +446,7 @@ Example of OCP 4.6 log forwarding of application logs to an external Elasticsear
 vi log-forwarding.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: "logging.openshift.io/v1"
 kind: ClusterLogForwarder
@@ -562,7 +562,7 @@ Here is an example of creating a syslog forwarder for just a single project:
 vi rsyslog-forwarder.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: "logging.openshift.io/v1"
 kind: ClusterLogForwarder
@@ -642,7 +642,7 @@ With the testing application deployed the following example combines forwarding 
 vi log-forwarding.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: "logging.openshift.io/v1"
 kind: ClusterLogForwarder

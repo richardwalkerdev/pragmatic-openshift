@@ -19,13 +19,13 @@ https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/s
 
 Check the integrity of the downloaded files:
 
-[source]
+[source%nowrap,bash]
 ----
 sha256sum openshift-client-linux.tar.gz
 sha256sum openshift-install-linux.tar.gz
 ----
 
-[source]
+[source%nowrap,bash]
 ----
 c1f39a966fc0dbd4f8f0bfec0196149d54e0330de523bf906bbe2728b10a860b  openshift-client-linux.tar.gz
 b81e1d25d77a05eaae8c0f154ed563c2caee21ed63401d655a7ad3206fdfd53c  openshift-install-linux.tar.gz
@@ -33,7 +33,7 @@ b81e1d25d77a05eaae8c0f154ed563c2caee21ed63401d655a7ad3206fdfd53c  openshift-inst
 
 Make a `bin` directory in your home directory:
 
-[source]
+[source%nowrap,bash]
 ----
 mkdir ~/bin
 ----
@@ -42,7 +42,7 @@ TIP: You may prefer to extract to `/usr/local/bin/`
 
 Extract the CLI tools:
 
-[source]
+[source%nowrap,bash]
 ----
 tar -xvf openshift-client-linux.tar.gz -C ~/bin
 tar -xvf openshift-install-linux.tar.gz -C ~/bin
@@ -50,24 +50,24 @@ tar -xvf openshift-install-linux.tar.gz -C ~/bin
 
 Check the `oc` version:
 
-[source]
+[source%nowrap,bash]
 ----
 oc version
 ----
 
-[source]
+[source%nowrap,bash]
 ----
 Client Version: 4.6.4
 ----
 
 Check the `openshift-install` version:
 
-[source]
+[source%nowrap,bash]
 ----
 openshift-install version
 ----
 
-[source]
+[source%nowrap,bash]
 ----
 openshift-install 4.6.4
 ----
@@ -76,26 +76,26 @@ openshift-install 4.6.4
 
 Create a working directory, for example:
 
-[source]
+[source%nowrap,bash]
 ----
 mkdir -p ~/ocp4/cluster && cd ~/ocp4
 ----
 
 Generate a new SSH key pair that will be embedded into the OpenShift deployment, this will enable you to SSH to OpenShift nodes.
 
-[source]
+[source%nowrap,bash]
 ----
 ssh-keygen -t rsa -b 4096 -N '' -f cluster_id_rsa
 ----
 
 Create an installation configuration file, the compute replicas is always set to zero for bare metal, this refers to worker nodes which are manually added post-deployment. The key option here is the `controlPlane: replicas` needs to be either `1` for a single node cluster or `3` for the minimal three node cluster. The bootstrap process does not complete until this defined critical is met, so plan ahead!
 
-[source]
+[source%nowrap,bash]
 ----
 vi install-config.yaml.orig
 ----
 
-[source]
+[source%nowrap,yaml]
 ----
 apiVersion: v1
 baseDomain: lab.com
@@ -127,14 +127,14 @@ Copy the configuration file into the cluster directory, it's important to have t
 
 IMPORTANT: Remember to paste in your real pull secret and public key.
 
-[source]
+[source%nowrap,bash]
 ----
 cp install-config.yaml.orig cluster/install-config.yaml
 ----
 
 The following two commands create and initiates the installation process. The first create manifests step gives you an opportunity to make further tweak to the deployment. The create ignition-configs uses those manifest to create the ignition files.
 
-[source]
+[source%nowrap,bash]
 ----
 openshift-install create manifests --dir=cluster
 openshift-install create ignition-configs --dir=cluster
@@ -142,7 +142,7 @@ openshift-install create ignition-configs --dir=cluster
 
 The files in the `cluster` directory should now look like this:
 
-[source]
+[source%nowrap,bash]
 ----
 auth
 bootstrap.ign
@@ -165,13 +165,13 @@ https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/s
 
 Check the integrity of the downloaded files:
 
-[source]
+[source%nowrap,bash]
 ----
 sha256sum rhcos-installer.x86_64.iso
 sha256sum rhcos-metal.x86_64.raw.gz
 ----
 
-[source]
+[source%nowrap,bash]
 ----
 d15bd7ae942573eece34ba9c59e110e360f15608f36e9b83ab9f2372d235bef2  rhcos-installer.x86_64.iso
 7e61bbe56735bc26d0808d4fffc4ccac25554df7d3c72c7b678e83e56c7ac5ba  rhcos-metal.x86_64.raw.gz
@@ -179,28 +179,28 @@ d15bd7ae942573eece34ba9c59e110e360f15608f36e9b83ab9f2372d235bef2  rhcos-installe
 
 Copy the three ignition files and the Red Hat CoreOS image to the `utilities.cluster.lab.com`, to be served by Apache:
 
-[source]
+[source%nowrap,bash]
 ----
 scp cluster/*.ign root@192.168.0.101:/var/www/html/
 ----
 
 Copy the Red Hat CoreOS image:
 
-[source]
+[source%nowrap,bash]
 ----
 scp rhcos-metal.x86_64.raw.gz root@192.168.0.101:/var/www/html/
 ----
 
 On `utilities.cluster.lab.com` ensure file permissions are correct:
 
-[source]
+[source%nowrap,bash]
 ----
 chmod 644 /var/www/html/*
 ----
 
 From the client computer test these files are available to download via HTTP:
 
-[source]
+[source%nowrap,bash]
 ----
 wget http://192.168.0.101:8080/bootstrap.ign
 ----
@@ -211,7 +211,7 @@ Using either using Virtual machine manager to create a KVM VM or VirtualBox, cre
 
 Using the `rhcos-installer.x86_64.iso` boot the VM up, until you arrive at a command prompt:
 
-[source]
+[source%nowrap,bash]
 ----
 $[core@localhost ~]$
 ----
@@ -220,14 +220,14 @@ The VM will have an IP Address assigned via DHCP, we need to set a static IP.
 
 View current interface IP Address:
 
-[source]
+[source%nowrap,bash]
 ----
 ip a
 ----
 
 View the connection:
 
-[source]
+[source%nowrap,bash]
 ----
 nmcli con show
 ----
@@ -243,7 +243,7 @@ nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.102
 
 Restart Network Manager and bring up the connection:
 
-[source]
+[source%nowrap,bash]
 ----
 sudo systemctl restart NetworkManager
 nmcli con up 'Wired Connection'
@@ -251,7 +251,7 @@ nmcli con up 'Wired Connection'
 
 Start the CoreOS installer, providing the `bootstrap.ign` ignition file:
 
-[source]
+[source%nowrap,bash]
 ----
 sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/bootstrap.ign /dev/sda --insecure-ignition --copy-network
 ----
@@ -268,21 +268,21 @@ image::images/bootstrap-lb.png[Bootstrap load balancer]
 
 From a Linux client you should be able to SSH to it using the private key generated earlier:
 
-[source]
+[source%nowrap,bash]
 ----
 ssh -i cluster_id_rsa core@192.168.0.102
 ----
 
 Check the progress on the bootstrap node with:
 
-[source]
+[source%nowrap,bash]
 ----
 journalctl -b -f -u release-image.service -u bootkube.service
 ----
 
 The following pods should eventually be up and running:
 
-[source]
+[source%nowrap,bash]
 ----
 sudo crictl pods
 
@@ -297,7 +297,7 @@ sudo crictl pods
 
 List the running containers and tail the logs of any one:
 
-[source]
+[source%nowrap,bash]
 ----
 sudo crictl ps
 
@@ -306,14 +306,14 @@ sudo crictl logs <CONTAINER_ID>
 
 From the the Linux client the following command should return `ok`:
 
-[source]
+[source%nowrap,bash]
 ----
 curl -X GET https://api.cluster.lab.com:6443/healthz -k
 ----
 
 Export the `kubeconfig` and test getting cluster operators with `oc get co`:
 
-[source]
+[source%nowrap,bash]
 ----
 export KUBECONFIG=cluster/auth/kubeconfig
 oc get co
@@ -321,7 +321,7 @@ oc get co
 
 You'll only see the `cloud-credential` operator is available at this stage:
 
-[source]
+[source%nowrap,bash]
 ----
 NAME                        VERSION   AVAILABLE   PROGRESSING   DEGRADED   SINCE
 authentication
@@ -341,12 +341,12 @@ Any other responses or errors mean there are issues with either networking, DNS 
 
 On your client you can see the progress of the installation and that it's moved on a step because api.cluster.lab.com is up and working:
 
-[source]
+[source%nowrap,bash]
 ----
 openshift-install --dir=cluster wait-for bootstrap-complete
 ----
 
-[source]
+[source%nowrap,bash]
 ----
 INFO Waiting up to 20m0s for the Kubernetes API at https://api.cluster.lab.com:6443...
 INFO API v1.19.0+9f84db3 up
@@ -361,7 +361,7 @@ For physical host installations, write the `rhcos-installer.x86_64.iso` image to
 
 Use `fdisk` to identify existing storage devices on your system, then insert the USB pen drive, using `fdisk` again to identify the device:
 
-[source]
+[source%nowrap,bash]
 ----
 fdisk -l
 ----
@@ -382,11 +382,11 @@ sudo dd if=rhcos-installer.x86_64.iso of=/dev/sda status=progress; sync
 
 The next steps repeat the process of booting the three physical nodes using the Red Hat CoreOS ISO. Make sure to use `master.ign`, and the right IP Address and hostname for each master node. In the case of an Intel NUC, `F10` is used to interrupt the host BIOS and select a boot device.
 
-===== master1.cluster.lab.com
+===== master1
 
 Using the `rhcos-installer.x86_64.iso` USB device, boot the VM up, until you arrive at a command prompt:
 
-[source]
+[source%nowrap,bash]
 ----
 $[core@localhost ~]$
 ----
@@ -395,14 +395,14 @@ The VM will have an IP Address assigned via DHCP, we need to set a static IP.
 
 View current interface IP Address:
 
-[source]
+[source%nowrap,bash]
 ----
 ip a
 ----
 
 View the connection:
 
-[source]
+[source%nowrap,bash]
 ----
 nmcli con show
 ----
@@ -416,7 +416,7 @@ nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.111
 
 Restart Network Manager and bring up the connection:
 
-[source]
+[source%nowrap,bash]
 ----
 sudo systemctl restart NetworkManager
 nmcli con up 'Wired Connection'
@@ -424,7 +424,7 @@ nmcli con up 'Wired Connection'
 
 Start the CoreOS installer, providing the `master.ign` ignition file:
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition --copy-network
 ----
@@ -433,7 +433,7 @@ Reboot the VM with `reboot`, make sure the VM boots from the hard disk storage (
 
 Hit `tab` at the RHCOS GRUB menu and add the following:
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 ip=192.168.0.111::192.168.0.1:255.255.255.0:master1.cluster.lab.com:ens3:none nameserver=192.168.0.101
 ----
@@ -456,7 +456,7 @@ ip=192.168.0.111::192.168.0.1:255.255.255.0:master1.cluster.lab.com:eno1:none:19
 nameserver=192.168.0.101
 ----
 
-===== master2.cluster.lab.com
+===== master2
 
 Repeat the process for the second master node:
 
@@ -465,18 +465,18 @@ Repeat the process for the second master node:
 nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.112/24 ipv4.gateway 192.168.0.1 ipv4.dns 192.168.0.101 connection.autoconnect yes
 ----
 
-[source]
+[source%nowrap,bash]
 ----
 sudo systemctl restart NetworkManager
 nmcli con up 'Wired Connection'
 ----
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition --copy-network
 ----
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 ip=192.168.0.112::192.168.0.1:255.255.255.0:master2.cluster.lab.com:ens3:none nameserver=192.168.0.101
 ----
@@ -493,7 +493,7 @@ ip=192.168.0.112::192.168.0.1:255.255.255.0:master2.cluster.lab.com:eno1:none:19
 nameserver=192.168.0.101
 ----
 
-===== master3.cluster.lab.com
+===== master3
 
 Repeat the process for the third master node:
 
@@ -502,18 +502,18 @@ Repeat the process for the third master node:
 nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.113/24 ipv4.gateway 192.168.0.1 ipv4.dns 192.168.0.101 connection.autoconnect yes
 ----
 
-[source]
+[source%nowrap,bash]
 ----
 sudo systemctl restart NetworkManager
 nmcli con up 'Wired Connection'
 ----
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ign /dev/sda --insecure-ignition --copy-network
 ----
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 ip=192.168.0.113::192.168.0.1:255.255.255.0:master3.cluster.lab.com:ens3:none nameserver=192.168.0.101
 ----
@@ -554,7 +554,7 @@ INFO Time elapsed: 0s
 
 Check all nodes are "Ready":
 
-[source]
+[source%nowrap,bash]
 ----
 oc get nodes
 ----
@@ -569,7 +569,7 @@ master3.cluster.lab.com   Ready    master,worker   13h   v1.19.0+9f84db3
 
 Check all operators are available:
 
-[source]
+[source%nowrap,bash]
 ----
 oc get co
 ----
@@ -620,12 +620,12 @@ image::images/ingress-lb.png[Ingress LB]
 
 During installation and from your client you can access the cluster using the `system:admin` account:
 
-[source]
+[source%nowrap,bash]
 ----
 export KUBECONFIG=cluster/auth/kubeconfig
 ----
 
-[source]
+[source%nowrap,bash]
 ----
 oc whoami
 system:admin
@@ -633,7 +633,7 @@ system:admin
 
 Login is as `kubeadmin`:
 
-[source]
+[source%nowrap,bash]
 ----
 cat cluster/auth/kubeadmin-password
 ----
@@ -645,7 +645,7 @@ oc login -u kubeadmin -p kLsUd-GkkRt-GwPI7-n2cku  https://api.cluster.lab.com:64
 
 Login to the OpenShift web console:
 
-[source]
+[source%nowrap,bash]
 ----
 oc project openshift-console
 oc get routes
@@ -669,21 +669,21 @@ oc patch etcd cluster -p='{"spec": {"unsupportedConfigOverrides": {"useUnsupport
 
 The following error can sometimes occur when attempting to login to the API via the command line:
 
-[source]
+[source%nowrap,bash]
 ----
 error: x509: certificate signed by unknown authority
 ----
 
 Switch projects:
 
-[source]
+[source%nowrap,bash]
 ----
 oc project openshift-authentication
 ----
 
 List the pods in the `openshift-authentication` project:
 
-[source]
+[source%nowrap,bash]
 ----
 oc get pods
 ----
@@ -697,7 +697,7 @@ oc rsh -n openshift-authentication oauth-openshift-568bcc5d8f-84zh2 cat /run/sec
 
 Copy and update your certificate authority certificates on your client host:
 
-[source]
+[source%nowrap,bash]
 ----
 sudo cp ingress-ca.crt /etc/pki/ca-trust/source/anchors/
 sudo update-ca-trust extract

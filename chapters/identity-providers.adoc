@@ -3,7 +3,7 @@
 It is essential to break down OpenShift components and concepts into digestible chunks and avoid the risk of being overwhelmed with complexity.
 
 * An Identity provider deals with the *authentication* layer and is responsible for identifying a user.
-* The *authorisation* layer determines if requests are honoured, Role-based access control (RBAC) policy determines what a user is authorised to do.
+* The *authorisation* layer determines if requests are honoured, Role-based access control (RBAC) policy determines what a user is authorized to do.
 
 The combination of groups and roles deals with *authorisation*.
 
@@ -76,7 +76,7 @@ Or via the command line:
 vi oauth.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: config.openshift.io/v1
 kind: OAuth
@@ -354,7 +354,7 @@ oc create configmap ldap-ca-bundle --from-file=ca.crt=/root/ocp4/ssl/ca.crt -n o
 
 Include the following options and use the `ldaps` syntax for port 636:
 
-[source]
+[source%nowrap,yaml]
 ----
 ca:
   name: ldap-ca-bundle
@@ -373,7 +373,7 @@ Before we create anything in OpenShift, try things out from the CLI first and ma
 
 Create a file called ldap_sync_config.yaml:
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 kind: LDAPSyncConfig
 apiVersion: v1
@@ -435,7 +435,7 @@ Service Account:
 ----
 vi ldap_sync_sa.yaml
 ----
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 ---
 kind: ServiceAccount
@@ -458,7 +458,7 @@ Cluster Role:
 ----
 vi ldap_sync_cr.yaml
 ----
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -492,7 +492,7 @@ Cluster Role Binding:
 vi ldap_sync_crb.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 ---
 kind: ClusterRoleBinding
@@ -524,7 +524,7 @@ This ConfigMap adds the file `ldap-group-sync.yaml` used earlier for testing thi
 ----
 vi ldap_sync_cm.yaml
 ----
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 kind: ConfigMap
 apiVersion: v1
@@ -575,7 +575,7 @@ Add the Cron Job
 vi ldap_sync_cj.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 kind: CronJob
 apiVersion: batch/v1beta1

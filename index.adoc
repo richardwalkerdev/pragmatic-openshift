@@ -8,7 +8,10 @@
 :stem: latexmath
 :quick-uri: https://asciidoctor.org/docs/asciidoc-syntax-quick-reference/
 :lang: en
-:stylesheet: css/custom.css
+:stylesheet: css/theme-combo.css
+:source-highlighter: coderay
+:coderay-linenums-mode: inline
+:coderay-css: class
 
 
 

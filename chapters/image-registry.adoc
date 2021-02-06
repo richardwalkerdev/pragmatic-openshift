@@ -72,7 +72,7 @@ Add a storage class with the no-provisioner option, making it a manual process:
 vi nfs-storage-class.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -100,7 +100,7 @@ You can now add persistent volume(s) (PV) using the `nfs` storage class:
 vi registry-pv.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: v1
 kind: PersistentVolume
@@ -143,7 +143,7 @@ To update the registry storage, you can add a persistent volume claim (PVC) usin
 vi registry-pvc.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -191,7 +191,7 @@ oc edit configs.imageregistry.operator.openshift.io
 
 Three things need changing under `spec:` include `managementState`, `replicas` and `storage`:
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 ...
   managementState: Managed
@@ -320,7 +320,7 @@ If you need to revert back to a known working configuration, you can make it eph
 oc edit configs.imageregistry.operator.openshift.io
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
   storage:
     emptyDir: {}

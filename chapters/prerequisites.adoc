@@ -22,21 +22,21 @@ In this document `CentOS-Userland-7-armv7hl-RaspberryPI-Minimal-2009-sda.raw.xz`
 
 `xz` is a lossless compression program, if not already installed, install it on your client:
 
-[source]
+[source%nowrap,bash]
 ----
 dnf install xz -y
 ----
 
 Decompress the file:
 
-[source]
+[source%nowrap,bash]
 ----
 unxz CentOS-Userland-7-armv7hl-RaspberryPI-Minimal-2009-sda.raw.xz
 ----
 
 Use `fdisk` to identify existing storage devices on your system, then insert the MicroSD card, using `fdisk` again to identify the card:
 
-[source]
+[source%nowrap,bash]
 ----
 fdisk -l
 ----
@@ -57,7 +57,7 @@ sudo dd if=CentOS-Userland-7-armv7hl-RaspberryPI-Minimal-2009-sda.raw of=/dev/sd
 
 Insert the SD card and power on the Raspberry Pi, logging in as `root` with the default password of `centos`:
 
-[source]
+[source%nowrap,bash]
 ----
 Username: root
 Password: centos
@@ -65,28 +65,28 @@ Password: centos
 
 Expand the filesystem with `/usr/bin/rootfs-expand`.
 
-[source]
+[source%nowrap,bash]
 ----
 /usr/bin/rootfs-expand
 ----
 
 Set the hostname:
 
-[source]
+[source%nowrap,bash]
 ----
 hostnamectl set-hostname utilities.cluster.lab.com
 ----
 
 Remove NetworkManger:
 
-[source]
+[source%nowrap,bash]
 ----
 yum remove NetworkManager
 ----
 
 Edit `/etc/sysconfig/network-scripts/ifcfg-eth0` and configure it as a static IP, I'm setting it to `192.168.0.101`:
 
-[source]
+[source%nowrap,bash]
 ----
 DEVICE=eth0
 TYPE=Ethernet
@@ -102,19 +102,19 @@ CAUTION: As a rule of thumb, take the time and effort to manage SELinux and `fir
 
 Disable SELinux:
 
-[source]
+[source%nowrap,bash]
 ----
 vi /etc/sysconfig/selinux
 ----
 
-[source]
+[source%nowrap,bash]
 ----
 SELINUX=disabled
 ----
 
 Disable firewall:
 
-[source]
+[source%nowrap,bash]
 ----
 systemctl stop firewalld
 systemctl disable firewalld
@@ -124,7 +124,7 @@ These can be configured these later, but the less potential cause of issues the 
 
 Install any updates and reboot:
 
-[source]
+[source%nowrap,bash]
 ----
 yum update -y
 reboot
@@ -132,7 +132,7 @@ reboot
 
 Assuming the changes made are correct, test the static IP address using SSH from a client: 
 
-[source]
+[source%nowrap,bash]
 ----
 ssh root@192.168.0.101
 ----
@@ -141,14 +141,14 @@ ssh root@192.168.0.101
 
 Install `dnsmasq`:
 
-[source]
+[source%nowrap,bash]
 ----
 yum install dnsmasq -y
 ----
 
 Backup the original configuration:
 
-[source]
+[source%nowrap,bash]
 ----
 cp /etc/dnsmasq.conf /etc/dnsmasq.conf.bak
 ----
@@ -157,12 +157,12 @@ The following `dnsmasq.conf` configuration file includes a few things but a key 
 
 Edit dnsmasq.conf:
 
-[source]
+[source%nowrap,bash]
 ----
 vi /etc/dnsmasq.conf
 ----
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 server=192.168.0.1
 server=8.8.8.8
@@ -182,12 +182,12 @@ srv-host=_etcd-server-ssl._tcp.cluster,master3.cluster.lab.com,2380,0,10
 
 Next I'm adding all the DNS entire I might ever need for a cluster:
 
-[source]
+[source%nowrap,bash]
 ----
 vi /etc/dnsmasq.openshift.hosts
 ----
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 192.168.0.101 utilities.cluster.lab.com dns.cluster.lab.com lb.cluster.lab.com api.cluster.lab.com api-int.cluster.lab.com
 192.168.0.102 bootstrap.cluster.lab.com
@@ -204,12 +204,12 @@ vi /etc/dnsmasq.openshift.hosts
 
 Next configure this host to use itself for DNS resolution:
 
-[source]
+[source%nowrap,bash]
 ----
 vi /etc/resolv.conf
 ----
 
-[source]
+[source%nowrap,bash]
 ----
 search Home cluster.lab.com
 nameserver 192.168.0.101
@@ -217,28 +217,28 @@ nameserver 192.168.0.101
 
 Lock `resolv.conf` from being modified:
 
-[source]
+[source%nowrap,bash]
 ----
 chattr +i /etc/resolv.conf
 ----
 
 Start and enable the service:
 
-[source]
+[source%nowrap,bash]
 ----
 systemctl enable dnsmasq.service --now
 ----
 
 Install bind-utils:
 
-[source]
+[source%nowrap,bash]
 ----
 yum install bind-utils -y
 ----
 
 Test some lookups, both IP Addresses and DNS entries should be resolvable, including `anything.apps.cluster.lab.com`:
 
-[source]
+[source%nowrap,bash]
 ----
 nslookup www.google.com
 nslookup master1.cluster.lab.com
@@ -251,26 +251,26 @@ nslookup bar.apps.cluster.lab.com
 
 Install HAProxy:
 
-[source]
+[source%nowrap,bash]
 ----
 yum install haproxy -y
 ----
 
 Back up the original configuration file:
 
-[source]
+[source%nowrap,bash]
 ----
 cp /etc/haproxy/haproxy.cfg /etc/haproxy/haproxy.cfg.bak
 ----
 
 And add the following configuration (changing IPs for your environment)
 
-[source]
+[source%nowrap,bash]
 ----
 vi /etc/haproxy/haproxy.cfg
 ----
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 global
     log         127.0.0.1 local2
@@ -376,7 +376,7 @@ This `haproxy.conf` example purposely uses inconsistent methods of configuration
 
 Enable and start HAProxy:
 
-[source]
+[source%nowrap,bash]
 ----
 systemctl enable haproxy.service --now
 ----
@@ -387,26 +387,26 @@ View the graphical statistics report at http://192.168.0.101:9000/stats. In this
 
 Install and configure `httpd` on port `8080` (because port 80 is already used by HAProxy)
 
-[source]
+[source%nowrap,bash]
 ----
 yum install httpd -y
 ----
 
 Edit `httpd.conf`:
 
-[source]
+[source%nowrap,bash]
 ----
 vi /etc/httpd/conf/httpd.conf
 ----
 
-[source]
+[source%nowrap,bash]
 ----
 Listen 8080
 ----
 
 Enable and start the service:
 
-[source]
+[source%nowrap,bash]
 ----
 systemctl enable httpd.service --now
 ----

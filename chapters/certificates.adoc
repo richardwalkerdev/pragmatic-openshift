@@ -223,7 +223,7 @@ To see the effect of the previous patch:
 oc get apiserver cluster -o yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 spec:
   servingCerts:

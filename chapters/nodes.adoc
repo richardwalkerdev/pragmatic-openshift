@@ -16,18 +16,18 @@ To avoid duplication just the key details are included, in this case three infra
 nmcli con mod 'Wired Connection' ipv4.method manual ipv4.addresses 192.168.0.131/24 ipv4.gateway 192.168.0.1 ipv4.dns 192.168.0.101 connection.autoconnect yes
 ----
 
-[source]
+[source%nowrap,bash]
 ----
 sudo systemctl restart NetworkManager
 nmcli con up 'Wired Connection'
 ----
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/worker.ign /dev/sda --insecure-ignition --copy-network 
 ----
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 ip=192.168.0.131::192.168.0.1:255.255.255.0:infra1.cluster.lab.com:ens3:none nameserver=192.168.0.101
 ----
@@ -36,21 +36,21 @@ The node should deploy as seen while doing master nodes but worker nodes get pro
 
 Check for certificate signing requests, as a cluster administrator view any pending csr:
 
-[source]
+[source%nowrap,bash]
 ----
 oc get csr
 ----
 
 Refined:
 
-[source]
+[source%nowrap,bash]
 ----
 oc get csr | grep -i pending
 ----
 
 Approve them:
 
-[source]
+[source%nowrap,bash]
 ----
 oc adm certificate approve csr-xyz
 ----
@@ -59,12 +59,12 @@ Typically, approving the first pending CSR, will cause a second one to appear sh
 
 Once both CRS are approved you'll see the node with a status NotReady:
 
-[source]
+[source%nowrap,bash]
 ----
 oc get nodes
 ----
 
-[source]
+[source%nowrap,bash]
 ----
 NAME                      STATUS     ROLES           AGE   VERSION
 infra1.cluster.lab.com    NotReady   worker          25s   v1.19.0+9f84db3
@@ -77,7 +77,7 @@ The deployment of the node is still in progress, eventually the node with change
 
 Example when all three infra nodes are initially added to the cluster:
 
-[source]
+[source%nowrap,bash]
 ----
 NAME                      STATUS     ROLES           AGE   VERSION
 infra1.cluster.lab.com    Ready      worker          68s   v1.19.0+9f84db3
@@ -113,7 +113,7 @@ spec:
   paused: false
 ----
 
-[source]
+[source%nowrap,bash]
 ----
 oc create -f infra-mcp.yaml
 ----
@@ -122,7 +122,7 @@ Label infra nodes and remove worker label:
 
 CAUTION: The adding of infra label forces a reboot of the node, wait for reboot before removing the worker label
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 oc label node infra1.cluster.lab.com node-role.kubernetes.io/infra=
 oc label node infra2.cluster.lab.com node-role.kubernetes.io/infra=
@@ -131,19 +131,19 @@ oc label node infra3.cluster.lab.com node-role.kubernetes.io/infra=
 
 Each node will be marked as non-schedulable and reboot in turn:
 
-[source]
+[source%nowrap,bash]
 ----
 watch oc get nodes
 ----
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 infra1.cluster.lab.com    Ready,SchedulingDisabled   infra,worker    5m3s   v1.19.0+9f84db3
 ----
 
 Once completed, each infra node will be labelled both `infra,worker`, remove the `worker` label from each:
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 oc label node infra1.cluster.lab.com node-role.kubernetes.io/worker-
 oc label node infra2.cluster.lab.com node-role.kubernetes.io/worker-
@@ -152,12 +152,12 @@ oc label node infra3.cluster.lab.com node-role.kubernetes.io/worker-
 
 Node should look like:
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 oc get nodes
 ----
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 NAME                      STATUS   ROLES           AGE   VERSION
 infra1.cluster.lab.com    Ready    infra           11m   v1.19.0+9f84db3
@@ -174,7 +174,7 @@ Add worker nodes by repeating the same process as adding infra nodes without any
 
 A typical deployment might look like this:
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 NAME                      STATUS   ROLES           AGE   VERSION
 infra1.cluster.lab.com    Ready    infra           11m   v1.19.0+9f84db3
@@ -193,12 +193,12 @@ worker3.cluster.lab.com   Ready    worker          11m   v1.19.0+9f84db3
 It's common practice to move the ingress router off the master nodes and run three replicas on the infra nodes. With the correctly labelled infranodes in place this is done with the following two patches.
 
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 oc patch -n openshift-ingress-operator ingresscontroller/default --patch '{"spec":{"nodePlacement": {"nodeSelector":{"matchLabels":{"node-role.kubernetes.io/infra": "" }}}}}' --type=merge
 ----
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 oc patch -n openshift-ingress-operator ingresscontroller/default --patch '{"spec":{"replicas": 3}}' --type=merge
 ----
@@ -209,14 +209,14 @@ IMPORTANT: Update the backend ingress load balancer, in this case, HAProxy, to n
 
 Disabling the master scheduler removes the "worker" label from master nodes, preventing unwanted applications from running on master nodes, reserving their resources for running the cluster. 
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 oc edit scheduler
 ----
 
 Set mastersSchedulable to false:
 
-[source%nowrap]
+[source%nowrap,yaml]
 ----
 apiVersion: config.openshift.io/v1
 kind: Scheduler
@@ -232,12 +232,12 @@ status: {}
 
 Validate:
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 oc get nodes
 ----
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 NAME                      STATUS   ROLES           AGE   VERSION
 infra1.cluster.lab.com    Ready    infra           11m   v1.19.0+9f84db3
@@ -253,12 +253,12 @@ worker3.cluster.lab.com   Ready    worker          11m   v1.19.0+9f84db3
 
 ==== Delete nodes
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 oc get nodes
 ----
 
-[source%nowrap]
+[source%nowrap,bash]
 ----
 oc delete node infra1.cluster.lab.com
 ----

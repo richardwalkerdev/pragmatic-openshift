@@ -27,7 +27,7 @@ Like with NFS, next create a new custom storage class for local block storage:
 vi local-storage-class.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -70,7 +70,7 @@ Assuming three infra nodes, each with a new 50GB disk attached, here is infra1:
 vi local-disks-infra1.yaml
 ----
 
-[source%nowrap,bash]
+[source%nowrap,yaml]
 ----
 apiVersion: "local.storage.openshift.io/v1"
 kind: "LocalVolume"
