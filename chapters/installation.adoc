@@ -157,6 +157,8 @@ Download the installer ISO image and the compressed metal RAW:
 
 https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/rhcos-installer.x86_64.iso
 
+NOTE: This changed to from "installer to "live" for example: https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/rhcos-4.7.0-x86_64-live.x86_64.iso
+
 https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/latest/latest/rhcos-metal.x86_64.raw.gz
 
 Checksums:
@@ -430,6 +432,8 @@ sudo coreos-installer install --ignition-url=http://192.168.0.101:8080/master.ig
 ----
 
 Reboot the VM with `reboot`, make sure the VM boots from the hard disk storage (remove the USB/ISO before it boots) or `shutdown` the VM and remove the CD-ROM from the boot order and power it back on.
+
+NOTE: Repeating with OpenShift 4.7 the `--copy-network` seems to actually work, making the next GRUB intercept redundent.
 
 Hit `tab` at the RHCOS GRUB menu and add the following:
 

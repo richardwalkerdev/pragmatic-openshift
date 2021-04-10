@@ -3,7 +3,7 @@
 In typical OpenShift deployments, using a cloud provider with credentials, storage classes will be made available for the target infrastructure. In a bare-metal situation, this is not a luxury. It is simple to define NFS for shared storage, which is OK for specific services and tasks but something like logging; performance will take a hit.
 It is possible to add physical block devices to nodes and use the "Local Storage Operator". However, local storage volumes are fixed to nodes, so moving pods that depend on block storage will run into difficulties, not being able to mount storage to different nodes on demand.
 
-For the image registry, NFS shared storage is the right choice. 
+For the image registry, NFS shared storage is the right choice.
 
 ==== NFS server
 
@@ -25,6 +25,14 @@ systemctl status nfs-server
 ----
 sudo mkdir -p /mnt/openshift/registry
 ----
+
+(Lazy) But open up permission on the directory to avoid issues in OpenShift:
+
+[source%nowrap,bash]
+----
+chmod -R 777 /nfs/openshift
+----
+
 
 [source%nowrap,bash]
 ----
@@ -236,7 +244,7 @@ oc get pvc
 [source%nowrap,bash]
 ----
 NAME                     STATUS   VOLUME        CAPACITY   ACCESS MODES   STORAGECLASS
-image-registry-storage   Bound    registry-pv   50Gi       RWX            nfs  
+image-registry-storage   Bound    registry-pv   50Gi       RWX            nfs
 ----
 
 ==== Expose registry
@@ -289,7 +297,7 @@ If you see:
 mount.nfs: No route to host
 ----
 
-It's either the PV is is configured incorrectly, pointing to a wrong NFS server or the NFS server/share is being blocked by a firewall or unavailable. 
+It's either the PV is is configured incorrectly, pointing to a wrong NFS server or the NFS server/share is being blocked by a firewall or unavailable.
 
 ===== Unexpected status
 
@@ -297,7 +305,7 @@ If you see errors with OpenShift deployments later like this:
 
 [source%nowrap,bash]
 ----
-Registry server Address: 
+Registry server Address:
 Registry server User Name: serviceaccount
 Registry server Email: serviceaccount@example.org
 Registry server Password: <<non-empty>>
